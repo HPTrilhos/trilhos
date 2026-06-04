@@ -1,0 +1,726 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#0f1a12">
+<title>Trilhos</title>
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.x/dist/tabler-icons.min.css"/>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Fraunces:opsz,wght@9..144,300;9..144,600&display=swap" rel="stylesheet">
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+:root{
+  --bg:#0f1a12;--bg2:#162019;--bg3:#1d2b20;--bg4:#243227;
+  --green:#4caf6e;--green2:#6fcf8e;--green3:#2d7a4a;
+  --amber:#e8b84b;--red:#e05252;--muted:#7a9882;
+  --text:#e8f0e9;--text2:#b0c4b5;--text3:#7a9882;
+  --border:rgba(76,175,110,0.15);--border2:rgba(76,175,110,0.28);
+  --radius:12px;--radius-sm:8px;
+  --mono:'DM Mono',monospace;--serif:'Fraunces',serif;
+}
+html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);font-family:var(--mono);font-size:14px}
+
+/* MAP */
+#map{position:fixed;inset:0;z-index:1}
+.leaflet-container{background:#1a2a1d}
+.leaflet-tile{filter:brightness(0.75) saturate(0.6) hue-rotate(20deg)}
+.leaflet-control-zoom{display:none}
+.leaflet-control-attribution{display:none}
+
+/* HEADER */
+#header{position:fixed;top:0;left:0;right:0;z-index:100;
+  background:linear-gradient(to bottom,rgba(15,26,18,0.97),rgba(15,26,18,0));
+  padding:env(safe-area-inset-top,0) 0 32px;pointer-events:none}
+#header-inner{display:flex;align-items:center;justify-content:space-between;
+  padding:16px 20px 0;pointer-events:all}
+#app-title{font-family:var(--serif);font-size:22px;font-weight:300;
+  color:var(--green2);letter-spacing:0.02em}
+#auth-btn{display:flex;align-items:center;gap:6px;padding:8px 14px;
+  background:var(--bg3);border:0.5px solid var(--border2);border-radius:20px;
+  color:var(--text2);font-family:var(--mono);font-size:12px;cursor:pointer;
+  transition:all 0.2s}
+#auth-btn:hover{background:var(--bg4);color:var(--green2)}
+#auth-btn i{font-size:16px}
+
+/* STATS BAR (during recording) */
+#stats-bar{position:fixed;top:80px;left:12px;right:12px;z-index:100;
+  display:none;background:rgba(15,26,18,0.92);border:0.5px solid var(--border2);
+  border-radius:var(--radius);padding:12px 16px;
+  backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
+#stats-bar.active{display:flex;gap:0;justify-content:space-between}
+.stat-item{display:flex;flex-direction:column;align-items:center;flex:1}
+.stat-val{font-size:20px;font-weight:500;color:var(--green2);font-family:var(--serif)}
+.stat-lbl{font-size:10px;color:var(--text3);margin-top:2px;letter-spacing:0.05em;text-transform:uppercase}
+.stat-sep{width:0.5px;background:var(--border);margin:4px 0}
+
+/* OFF-TRACK ALERT */
+#offtrack{position:fixed;top:160px;left:50%;transform:translateX(-50%);z-index:200;
+  background:rgba(224,82,82,0.92);color:#fff;padding:8px 18px;border-radius:20px;
+  font-size:12px;font-weight:500;display:none;white-space:nowrap;
+  letter-spacing:0.05em}
+#offtrack.show{display:block}
+
+/* BOTTOM PANEL */
+#bottom{position:fixed;bottom:0;left:0;right:0;z-index:100;
+  padding:0 0 env(safe-area-inset-bottom,0)}
+#bottom-inner{background:rgba(15,26,18,0.97);border-top:0.5px solid var(--border);
+  backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px)}
+
+/* TABS */
+#tabs{display:flex;border-bottom:0.5px solid var(--border)}
+.tab{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;
+  padding:12px 4px 10px;cursor:pointer;color:var(--text3);transition:color 0.2s}
+.tab i{font-size:20px}
+.tab span{font-size:10px;letter-spacing:0.04em}
+.tab.active{color:var(--green2)}
+.tab-indicator{height:2px;background:var(--green);border-radius:1px;
+  width:24px;margin:-2px auto 0;opacity:0;transition:opacity 0.2s}
+.tab.active .tab-indicator{opacity:1}
+
+/* PANELS */
+#panels{overflow:hidden;transition:height 0.3s cubic-bezier(0.4,0,0.2,1)}
+.panel{display:none;padding:16px 20px 20px}
+.panel.active{display:block}
+
+/* RECORD PANEL */
+#rec-btn{width:100%;padding:14px;border-radius:var(--radius);
+  font-family:var(--mono);font-size:14px;font-weight:500;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;gap:10px;
+  transition:all 0.2s;letter-spacing:0.03em;border:none}
+#rec-btn.idle{background:var(--green3);color:var(--green2)}
+#rec-btn.idle:hover{background:#3a9a58}
+#rec-btn.recording{background:rgba(224,82,82,0.2);color:var(--red);
+  border:0.5px solid rgba(224,82,82,0.4)}
+#rec-btn i{font-size:18px}
+#type-sel{display:flex;gap:8px;margin-bottom:12px}
+.type-opt{flex:1;padding:10px;border:0.5px solid var(--border);border-radius:var(--radius-sm);
+  cursor:pointer;text-align:center;color:var(--text3);transition:all 0.2s;font-family:var(--mono);
+  font-size:12px}
+.type-opt i{display:block;font-size:20px;margin-bottom:4px}
+.type-opt.selected{border-color:var(--green);color:var(--green2);background:rgba(76,175,110,0.08)}
+
+/* IMPORT PANEL */
+#import-zone{border:1px dashed var(--border2);border-radius:var(--radius);
+  padding:24px 16px;text-align:center;cursor:pointer;transition:all 0.2s;
+  color:var(--text3)}
+#import-zone:hover{border-color:var(--green);color:var(--green2);background:rgba(76,175,110,0.04)}
+#import-zone i{font-size:32px;display:block;margin-bottom:8px}
+#file-input{display:none}
+#imported-track{display:none;margin-top:12px;padding:12px 14px;
+  background:var(--bg3);border-radius:var(--radius-sm);
+  border:0.5px solid var(--border)}
+#imported-name{font-weight:500;color:var(--green2);font-size:13px;margin-bottom:4px}
+#imported-meta{color:var(--text3);font-size:11px}
+#clear-import{float:right;background:none;border:none;color:var(--text3);cursor:pointer;font-size:16px;padding:0}
+#clear-import:hover{color:var(--red)}
+
+/* HISTORY PANEL */
+#history-list{max-height:220px;overflow-y:auto}
+.hist-item{display:flex;align-items:center;gap:12px;padding:10px 0;
+  border-bottom:0.5px solid var(--border);cursor:pointer;transition:opacity 0.15s}
+.hist-item:last-child{border-bottom:none}
+.hist-item:hover{opacity:0.75}
+.hist-icon{width:36px;height:36px;border-radius:var(--radius-sm);
+  background:var(--bg3);display:flex;align-items:center;justify-content:center;
+  color:var(--green2);font-size:18px;flex-shrink:0}
+.hist-info{flex:1;min-width:0}
+.hist-name{font-weight:500;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hist-meta{font-size:11px;color:var(--text3);margin-top:2px}
+.hist-actions{display:flex;gap:4px}
+.hist-action{background:none;border:none;color:var(--text3);cursor:pointer;padding:6px;font-size:16px;
+  border-radius:6px;transition:all 0.15s}
+.hist-action:hover{color:var(--green2);background:var(--bg3)}
+.hist-action.del:hover{color:var(--red)}
+#no-history{text-align:center;padding:24px;color:var(--text3);font-size:13px}
+#no-history i{font-size:28px;display:block;margin-bottom:8px}
+
+/* DRIVE PANEL */
+#drive-panel .info-row{display:flex;align-items:center;gap:10px;
+  padding:10px 0;border-bottom:0.5px solid var(--border);font-size:13px}
+#drive-panel .info-row:last-child{border-bottom:none}
+#drive-panel .info-row i{color:var(--green2);font-size:18px;width:20px;text-align:center}
+#drive-panel .info-row span{color:var(--text2)}
+#drive-status{margin-bottom:12px;padding:10px 12px;border-radius:var(--radius-sm);
+  background:var(--bg3);font-size:12px;color:var(--text3)}
+#drive-status.connected{color:var(--green2);background:rgba(76,175,110,0.08)}
+
+/* PULSE dot */
+.pulse-dot{position:relative;width:16px;height:16px}
+.pulse-dot::before{content:'';position:absolute;inset:0;border-radius:50%;
+  background:var(--green);animation:pulse 1.5s ease-out infinite}
+.pulse-dot::after{content:'';position:absolute;inset:3px;border-radius:50%;background:var(--green2)}
+@keyframes pulse{0%{transform:scale(1);opacity:0.8}100%{transform:scale(2.5);opacity:0}}
+
+/* GPS MARKER */
+.gps-marker{width:18px;height:18px;border-radius:50%;background:var(--green2);
+  border:3px solid #fff;box-shadow:0 0 0 3px rgba(76,175,110,0.4)}
+.gps-arrow{width:0;height:0;filter:drop-shadow(0 1px 2px rgba(0,0,0,0.5))}
+
+/* TOAST */
+#toast{position:fixed;bottom:120px;left:50%;transform:translateX(-50%);
+  z-index:300;background:var(--bg3);border:0.5px solid var(--border2);
+  border-radius:20px;padding:10px 20px;font-size:12px;color:var(--text2);
+  opacity:0;transition:opacity 0.3s;pointer-events:none;white-space:nowrap}
+#toast.show{opacity:1}
+
+/* scrollbar */
+::-webkit-scrollbar{width:4px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+
+/* Recording blink */
+@keyframes recblink{0%,100%{opacity:1}50%{opacity:0.3}}
+.rec-dot{display:inline-block;width:8px;height:8px;border-radius:50%;
+  background:var(--red);animation:recblink 1s infinite;margin-right:4px}
+</style>
+</head>
+<body>
+
+<div id="map"></div>
+
+<div id="header">
+  <div id="header-inner">
+    <div id="app-title">Trilhos</div>
+    <button id="auth-btn" onclick="handleAuth()">
+      <i class="ti ti-brand-google"></i>
+      <span id="auth-label">Ligar Drive</span>
+    </button>
+  </div>
+</div>
+
+<div id="stats-bar">
+  <div class="stat-item">
+    <span class="stat-val" id="st-dist">0.00</span>
+    <span class="stat-lbl">km</span>
+  </div>
+  <div class="stat-sep"></div>
+  <div class="stat-item">
+    <span class="stat-val" id="st-time">00:00</span>
+    <span class="stat-lbl">tempo</span>
+  </div>
+  <div class="stat-sep"></div>
+  <div class="stat-item">
+    <span class="stat-val" id="st-spd">0.0</span>
+    <span class="stat-lbl">km/h</span>
+  </div>
+  <div class="stat-sep"></div>
+  <div class="stat-item">
+    <span class="stat-val" id="st-elev">—</span>
+    <span class="stat-lbl">m alt</span>
+  </div>
+</div>
+
+<div id="offtrack">⚠ Fora do trilho</div>
+
+<div id="bottom">
+  <div id="bottom-inner">
+    <div id="tabs">
+      <div class="tab active" onclick="switchTab('rec')">
+        <i class="ti ti-circle-dot"></i>
+        <span>Registar</span>
+        <div class="tab-indicator"></div>
+      </div>
+      <div class="tab" onclick="switchTab('import')">
+        <i class="ti ti-file-import"></i>
+        <span>Importar</span>
+        <div class="tab-indicator"></div>
+      </div>
+      <div class="tab" onclick="switchTab('hist')">
+        <i class="ti ti-route"></i>
+        <span>Percursos</span>
+        <div class="tab-indicator"></div>
+      </div>
+      <div class="tab" onclick="switchTab('drive')">
+        <i class="ti ti-cloud"></i>
+        <span>Drive</span>
+        <div class="tab-indicator"></div>
+      </div>
+    </div>
+    <div id="panels">
+      <!-- RECORD -->
+      <div class="panel active" id="panel-rec">
+        <div id="type-sel">
+          <div class="type-opt selected" id="type-walk" onclick="selectType('walk')">
+            <i class="ti ti-walk"></i>Caminhada
+          </div>
+          <div class="type-opt" id="type-bike" onclick="selectType('bike')">
+            <i class="ti ti-bike"></i>Bicicleta
+          </div>
+        </div>
+        <button id="rec-btn" class="idle" onclick="toggleRecording()">
+          <i class="ti ti-player-record" id="rec-icon"></i>
+          <span id="rec-label">Iniciar registo</span>
+        </button>
+      </div>
+      <!-- IMPORT -->
+      <div class="panel" id="panel-import">
+        <div id="import-zone" onclick="document.getElementById('file-input').click()">
+          <i class="ti ti-file-type-gpx"></i>
+          <div style="font-size:13px;font-weight:500;margin-bottom:4px">Importar trilho GPX</div>
+          <div style="font-size:11px">Wikiloc · AllTrails · Garmin · Komoot</div>
+        </div>
+        <input type="file" id="file-input" accept=".gpx,.kml" onchange="loadGPXFile(event)">
+        <div id="imported-track">
+          <div style="display:flex;align-items:center;justify-content:space-between">
+            <div id="imported-name"></div>
+            <button id="clear-import" onclick="clearImport()"><i class="ti ti-x"></i></button>
+          </div>
+          <div id="imported-meta"></div>
+          <button style="width:100%;margin-top:10px;padding:10px;border-radius:var(--radius-sm);
+            background:rgba(76,175,110,0.1);border:0.5px solid var(--border2);color:var(--green2);
+            font-family:var(--mono);font-size:12px;cursor:pointer" onclick="centerOnImport()">
+            <i class="ti ti-crosshair"></i> Centrar no mapa
+          </button>
+        </div>
+      </div>
+      <!-- HISTORY -->
+      <div class="panel" id="panel-hist">
+        <div id="history-list"></div>
+      </div>
+      <!-- DRIVE -->
+      <div class="panel" id="panel-drive">
+        <div id="drive-status">Não ligado ao Google Drive</div>
+        <div class="info-row" style="display:flex;align-items:flex-start;gap:10px;padding:8px 0;font-size:12px;color:var(--text3);border-bottom:0.5px solid var(--border)">
+          <i class="ti ti-info-circle" style="color:var(--amber);font-size:16px;margin-top:1px"></i>
+          <span>Para activar o Google Drive, configura o Client ID no Google Cloud Console com a API do Drive activada. Substitui <code style="color:var(--amber)">YOUR_CLIENT_ID</code> no código da app.</span>
+        </div>
+        <div style="margin-top:12px">
+          <div style="font-size:11px;color:var(--text3);margin-bottom:8px;letter-spacing:0.04em">FUNCIONALIDADES DRIVE</div>
+          <div id="drive-panel">
+            <div class="info-row"><i class="ti ti-upload"></i><span>Sincronização automática de percursos</span></div>
+            <div class="info-row"><i class="ti ti-folder"></i><span>Pasta <em>Trilhos GPS/</em> no teu Drive</span></div>
+            <div class="info-row"><i class="ti ti-file-type-gpx"></i><span>Ficheiros GPX individuais por percurso</span></div>
+            <div class="info-row"><i class="ti ti-world"></i><span>Acesso de qualquer dispositivo</span></div>
+            <div class="info-row"><i class="ti ti-brand-google"></i><span>Compatível com Google Earth (KML)</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+const GOOGLE_CLIENT_ID = 'YOUR_CLIENT_ID';
+const DRIVE_SCOPE = 'https://www.googleapis.com/auth/drive.file';
+const OFF_TRACK_THRESHOLD = 50; // metros
+
+let map, gpsMarker, recordedPolyline, importedPolyline;
+let tracking = false, activityType = 'walk';
+let watchId = null, timerInterval = null;
+let recordedPoints = [], startTime = null, totalDistance = 0;
+let importedTrack = null;
+let googleUser = null, driveToken = null;
+let history = [];
+let currentTab = 'rec';
+
+// ---- INIT ----
+function init() {
+  map = L.map('map', {zoomControl:false, attributionControl:false}).setView([41.15, -8.61], 13);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {maxZoom:19}).addTo(map);
+
+  gpsMarker = L.divIcon({className:'gps-marker',iconSize:[18,18],iconAnchor:[9,9]});
+  recordedPolyline = L.polyline([],{color:'#4caf6e',weight:4,opacity:0.9}).addTo(map);
+  importedPolyline = L.polyline([],{color:'#e8b84b',weight:3,opacity:0.85,dashArray:'8,4'}).addTo(map);
+
+  loadHistory();
+  renderHistory();
+  adjustPanelHeight();
+  tryGPS();
+}
+
+function tryGPS() {
+  if (!navigator.geolocation) return;
+  navigator.geolocation.getCurrentPosition(pos => {
+    map.setView([pos.coords.latitude, pos.coords.longitude], 15);
+    setGPSMarker(pos.coords.latitude, pos.coords.longitude);
+  }, null, {enableHighAccuracy:true});
+}
+
+// ---- TABS ----
+function switchTab(tab) {
+  currentTab = tab;
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  const tabs = ['rec','import','hist','drive'];
+  const idx = tabs.indexOf(tab);
+  document.querySelectorAll('.tab')[idx].classList.add('active');
+  document.getElementById('panel-'+tab).classList.add('active');
+  adjustPanelHeight();
+  if (tab === 'hist') renderHistory();
+}
+
+function adjustPanelHeight() {
+  setTimeout(() => {
+    const panel = document.querySelector('.panel.active');
+    if (panel) {
+      const h = panel.scrollHeight;
+      document.getElementById('panels').style.height = Math.min(h, 260) + 'px';
+    }
+  }, 50);
+}
+
+// ---- TYPE ----
+function selectType(t) {
+  activityType = t;
+  document.querySelectorAll('.type-opt').forEach(e => e.classList.remove('selected'));
+  document.getElementById('type-'+t).classList.add('selected');
+}
+
+// ---- RECORDING ----
+function toggleRecording() {
+  if (!tracking) startRecording(); else stopRecording();
+}
+
+function startRecording() {
+  if (!navigator.geolocation) { toast('GPS não disponível'); return; }
+  tracking = true;
+  recordedPoints = [];
+  totalDistance = 0;
+  startTime = Date.now();
+  recordedPolyline.setLatLngs([]);
+  document.getElementById('rec-btn').className = 'recording';
+  document.getElementById('rec-icon').className = 'ti ti-player-stop';
+  document.getElementById('rec-label').innerHTML = '<span class="rec-dot"></span>A registar...';
+  document.getElementById('stats-bar').classList.add('active');
+  timerInterval = setInterval(updateTimer, 1000);
+  watchId = navigator.geolocation.watchPosition(onGPS, onGPSErr, {
+    enableHighAccuracy:true, maximumAge:2000, timeout:10000
+  });
+  toast('Registo iniciado');
+}
+
+function stopRecording() {
+  tracking = false;
+  navigator.geolocation.clearWatch(watchId);
+  clearInterval(timerInterval);
+  document.getElementById('rec-btn').className = 'idle';
+  document.getElementById('rec-icon').className = 'ti ti-player-record';
+  document.getElementById('rec-label').textContent = 'Iniciar registo';
+  document.getElementById('stats-bar').classList.remove('active');
+  document.getElementById('offtrack').classList.remove('show');
+  if (recordedPoints.length > 1) saveTrack();
+}
+
+function onGPS(pos) {
+  const {latitude:lat, longitude:lng, altitude, speed} = pos.coords;
+  setGPSMarker(lat, lng);
+  map.setView([lat, lng]);
+  if (!tracking) return;
+  const pt = {lat, lng, alt: altitude||null, ts: Date.now()};
+  if (recordedPoints.length > 0) {
+    const prev = recordedPoints[recordedPoints.length-1];
+    totalDistance += haversine(prev.lat, prev.lng, lat, lng);
+  }
+  recordedPoints.push(pt);
+  recordedPolyline.addLatLng([lat, lng]);
+  document.getElementById('st-dist').textContent = (totalDistance/1000).toFixed(2);
+  const spd = speed != null ? (speed * 3.6).toFixed(1) : '—';
+  document.getElementById('st-spd').textContent = spd;
+  if (altitude != null) document.getElementById('st-elev').textContent = Math.round(altitude);
+  checkOffTrack(lat, lng);
+}
+
+function onGPSErr(e) { if (tracking) toast('Sinal GPS fraco'); }
+
+function setGPSMarker(lat, lng) {
+  if (!map._gpsM) {
+    map._gpsM = L.marker([lat,lng], {
+      icon: L.divIcon({className:'gps-marker',iconSize:[18,18],iconAnchor:[9,9]}),
+      zIndexOffset:1000
+    }).addTo(map);
+  } else {
+    map._gpsM.setLatLng([lat, lng]);
+  }
+}
+
+function updateTimer() {
+  const elapsed = Math.floor((Date.now() - startTime)/1000);
+  const m = String(Math.floor(elapsed/60)).padStart(2,'0');
+  const s = String(elapsed%60).padStart(2,'0');
+  document.getElementById('st-time').textContent = m+':'+s;
+}
+
+function checkOffTrack(lat, lng) {
+  if (!importedTrack || importedTrack.length === 0) return;
+  const minDist = importedTrack.reduce((min, pt) => {
+    return Math.min(min, haversine(lat, lng, pt.lat, pt.lng));
+  }, Infinity);
+  document.getElementById('offtrack').classList.toggle('show', minDist > OFF_TRACK_THRESHOLD);
+}
+
+// ---- GPX IMPORT ----
+function loadGPXFile(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => parseGPX(ev.target.result, file.name);
+  reader.readAsText(file);
+  e.target.value = '';
+}
+
+function parseGPX(text, name) {
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(text, 'application/xml');
+  const trkpts = doc.querySelectorAll('trkpt, rtept, wpt');
+  if (trkpts.length === 0) { toast('Ficheiro GPX inválido'); return; }
+  importedTrack = Array.from(trkpts).map(pt => ({
+    lat: parseFloat(pt.getAttribute('lat')),
+    lng: parseFloat(pt.getAttribute('lon')),
+    ele: pt.querySelector('ele') ? parseFloat(pt.querySelector('ele').textContent) : null
+  }));
+  const latlngs = importedTrack.map(p => [p.lat, p.lng]);
+  importedPolyline.setLatLngs(latlngs);
+  map.fitBounds(importedPolyline.getBounds(), {padding:[40,40]});
+  const distKm = calcTrackDistance(importedTrack);
+  const cleanName = name.replace(/\.(gpx|kml)$/i,'');
+  document.getElementById('imported-name').textContent = cleanName;
+  document.getElementById('imported-meta').textContent = `${importedTrack.length} pontos · ${distKm.toFixed(2)} km`;
+  document.getElementById('imported-track').style.display = 'block';
+  document.getElementById('import-zone').style.display = 'none';
+  adjustPanelHeight();
+  toast('Trilho carregado');
+}
+
+function clearImport() {
+  importedTrack = null;
+  importedPolyline.setLatLngs([]);
+  document.getElementById('imported-track').style.display = 'none';
+  document.getElementById('import-zone').style.display = 'block';
+  adjustPanelHeight();
+}
+
+function centerOnImport() {
+  if (importedPolyline.getLatLngs().length > 0)
+    map.fitBounds(importedPolyline.getBounds(), {padding:[40,40]});
+}
+
+// ---- SAVE / HISTORY ----
+function saveTrack() {
+  const name = prompt('Nome do percurso:', formatDate(new Date()));
+  if (!name) return;
+  const track = {
+    id: Date.now().toString(),
+    name, type: activityType,
+    date: new Date().toISOString(),
+    distance: totalDistance,
+    duration: Math.floor((Date.now()-startTime)/1000),
+    points: recordedPoints
+  };
+  history.unshift(track);
+  saveHistory();
+  renderHistory();
+  toast('Percurso guardado');
+  if (driveToken) syncToDrive(track);
+}
+
+function loadHistory() {
+  try { history = JSON.parse(localStorage.getItem('trilhos_history')||'[]'); } catch(e){ history=[]; }
+}
+
+function saveHistory() {
+  localStorage.setItem('trilhos_history', JSON.stringify(history));
+}
+
+function renderHistory() {
+  const el = document.getElementById('history-list');
+  if (history.length === 0) {
+    el.innerHTML = '<div id="no-history"><i class="ti ti-route-off"></i>Ainda sem percursos registados</div>';
+    return;
+  }
+  el.innerHTML = history.map(t => `
+    <div class="hist-item" onclick="showTrack('${t.id}')">
+      <div class="hist-icon"><i class="ti ti-${t.type==='bike'?'bike':'walk'}"></i></div>
+      <div class="hist-info">
+        <div class="hist-name">${t.name}</div>
+        <div class="hist-meta">${formatDate(new Date(t.date))} · ${(t.distance/1000).toFixed(2)} km · ${formatDur(t.duration)}</div>
+      </div>
+      <div class="hist-actions">
+        <button class="hist-action" onclick="event.stopPropagation();exportGPX('${t.id}')" title="Exportar GPX"><i class="ti ti-download"></i></button>
+        <button class="hist-action del" onclick="event.stopPropagation();deleteTrack('${t.id}')" title="Apagar"><i class="ti ti-trash"></i></button>
+      </div>
+    </div>`).join('');
+}
+
+function showTrack(id) {
+  const t = history.find(x => x.id === id);
+  if (!t || t.points.length < 2) return;
+  recordedPolyline.setLatLngs(t.points.map(p => [p.lat, p.lng]));
+  map.fitBounds(recordedPolyline.getBounds(), {padding:[40,40]});
+  switchTab('rec');
+}
+
+function deleteTrack(id) {
+  if (!confirm('Apagar este percurso?')) return;
+  history = history.filter(t => t.id !== id);
+  saveHistory();
+  renderHistory();
+}
+
+// ---- GPX EXPORT ----
+function exportGPX(id) {
+  const t = history.find(x => x.id === id);
+  if (!t) return;
+  const gpx = buildGPX(t);
+  const blob = new Blob([gpx], {type:'application/gpx+xml'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = t.name.replace(/\s+/g,'_')+'.gpx';
+  a.click();
+}
+
+function buildGPX(track) {
+  const pts = track.points.map(p =>
+    `    <trkpt lat="${p.lat.toFixed(7)}" lon="${p.lng.toFixed(7)}">${p.alt!=null?`<ele>${p.alt.toFixed(1)}</ele>`:''}${p.ts?`<time>${new Date(p.ts).toISOString()}</time>`:''}</trkpt>`
+  ).join('\n');
+  return `<?xml version="1.0" encoding="UTF-8"?>
+<gpx version="1.1" creator="Trilhos App"
+  xmlns="http://www.topografix.com/GPX/1/1">
+  <metadata>
+    <name>${track.name}</name>
+    <time>${track.date}</time>
+  </metadata>
+  <trk>
+    <name>${track.name}</name>
+    <type>${track.type}</type>
+    <trkseg>
+${pts}
+    </trkseg>
+  </trk>
+</gpx>`;
+}
+
+// ---- GOOGLE AUTH ----
+function handleAuth() {
+  if (driveToken) { signOut(); return; }
+  if (GOOGLE_CLIENT_ID === 'YOUR_CLIENT_ID') {
+    alert('Configura o Google Client ID no código da app.\n\nPassos:\n1. Google Cloud Console\n2. Criar projecto\n3. Activar Drive API\n4. Criar OAuth 2.0 Client ID (tipo: Web)\n5. Substituir YOUR_CLIENT_ID no código');
+    return;
+  }
+  const params = new URLSearchParams({
+    client_id: GOOGLE_CLIENT_ID,
+    redirect_uri: location.origin + location.pathname,
+    response_type: 'token',
+    scope: DRIVE_SCOPE,
+    prompt: 'select_account'
+  });
+  location.href = 'https://accounts.google.com/o/oauth2/v2/auth?' + params;
+}
+
+function signOut() {
+  driveToken = null;
+  sessionStorage.removeItem('drive_token');
+  document.getElementById('auth-label').textContent = 'Ligar Drive';
+  document.getElementById('auth-btn').querySelector('i').className = 'ti ti-brand-google';
+  document.getElementById('drive-status').textContent = 'Não ligado ao Google Drive';
+  document.getElementById('drive-status').className = '';
+  toast('Drive desligado');
+}
+
+function checkOAuthCallback() {
+  const hash = location.hash;
+  if (!hash.includes('access_token')) return;
+  const params = new URLSearchParams(hash.substring(1));
+  const token = params.get('access_token');
+  if (token) {
+    driveToken = token;
+    sessionStorage.setItem('drive_token', token);
+    history.replaceState(null,'',location.pathname);
+    setDriveConnected();
+    toast('Google Drive ligado');
+  }
+}
+
+function setDriveConnected() {
+  document.getElementById('auth-label').textContent = 'Drive ligado';
+  document.getElementById('auth-btn').querySelector('i').className = 'ti ti-cloud-check';
+  document.getElementById('drive-status').textContent = '✓ Ligado ao Google Drive';
+  document.getElementById('drive-status').className = 'connected';
+}
+
+// ---- DRIVE SYNC ----
+async function syncToDrive(track) {
+  if (!driveToken) return;
+  try {
+    const gpxContent = buildGPX(track);
+    const folderId = await getOrCreateFolder('Trilhos GPS');
+    await uploadFile(folderId, track.name.replace(/\s+/g,'_')+'.gpx', gpxContent, 'application/gpx+xml');
+    toast('Sincronizado com Drive');
+  } catch(e) { toast('Erro ao sincronizar com Drive'); }
+}
+
+async function getOrCreateFolder(name) {
+  const res = await driveAPI(`files?q=name='${name}' and mimeType='application/vnd.google-apps.folder' and trashed=false&fields=files(id)`);
+  if (res.files && res.files.length > 0) return res.files[0].id;
+  const folder = await driveAPI('files', 'POST', {name, mimeType:'application/vnd.google-apps.folder'});
+  return folder.id;
+}
+
+async function uploadFile(folderId, name, content, mimeType) {
+  const meta = JSON.stringify({name, mimeType, parents:[folderId]});
+  const boundary = '-------trilhos_boundary';
+  const body = `--${boundary}\r\nContent-Type: application/json\r\n\r\n${meta}\r\n--${boundary}\r\nContent-Type: ${mimeType}\r\n\r\n${content}\r\n--${boundary}--`;
+  await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', {
+    method:'POST',
+    headers:{Authorization:`Bearer ${driveToken}`,
+      'Content-Type':`multipart/related; boundary=${boundary}`},
+    body
+  });
+}
+
+async function driveAPI(path, method='GET', body=null) {
+  const opts = {method, headers:{Authorization:`Bearer ${driveToken}`,'Content-Type':'application/json'}};
+  if (body) opts.body = JSON.stringify(body);
+  const res = await fetch('https://www.googleapis.com/drive/v3/'+path, opts);
+  return res.json();
+}
+
+// ---- UTILS ----
+function haversine(lat1,lng1,lat2,lng2) {
+  const R=6371000, dLat=(lat2-lat1)*Math.PI/180, dLng=(lng2-lng1)*Math.PI/180;
+  const a=Math.sin(dLat/2)**2+Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLng/2)**2;
+  return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
+}
+
+function calcTrackDistance(pts) {
+  return pts.reduce((d,p,i) => i===0?0:d+haversine(pts[i-1].lat,pts[i-1].lng,p.lat,p.lng),0)/1000;
+}
+
+function formatDate(d) {
+  return d.toLocaleDateString('pt-PT',{day:'2-digit',month:'2-digit',year:'numeric'});
+}
+
+function formatDur(secs) {
+  const h=Math.floor(secs/3600), m=Math.floor((secs%3600)/60), s=secs%60;
+  if (h>0) return `${h}h${String(m).padStart(2,'0')}m`;
+  return `${String(m).padStart(2,'0')}m${String(s).padStart(2,'0')}s`;
+}
+
+let toastTimer;
+function toast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove('show'), 2500);
+}
+
+// ---- BOOT ----
+window.addEventListener('load', () => {
+  const savedToken = sessionStorage.getItem('drive_token');
+  if (savedToken) { driveToken = savedToken; setDriveConnected(); }
+  checkOAuthCallback();
+  init();
+});
+</script>
+</body>
+</html>

@@ -7,6 +7,9 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#0f1a12">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
 <title>Trilhos</title>
 
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
@@ -106,7 +109,7 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
 #clear-import{float:right;background:none;border:none;color:var(--text3);cursor:pointer;font-size:16px;padding:0}
 #clear-import:hover{color:var(--red)}
 
-#history-list{max-height:220px;overflow-y:auto}
+#tracks-list{max-height:220px;overflow-y:auto}
 .hist-item{display:flex;align-items:center;gap:12px;padding:10px 0;
   border-bottom:0.5px solid var(--border);cursor:pointer;transition:opacity 0.15s}
 .hist-item:last-child{border-bottom:none}
@@ -122,8 +125,8 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
   border-radius:6px;transition:all 0.15s}
 .hist-action:hover{color:var(--green2);background:var(--bg3)}
 .hist-action.del:hover{color:var(--red)}
-#no-history{text-align:center;padding:24px;color:var(--text3);font-size:13px}
-#no-history i{font-size:28px;display:block;margin-bottom:8px}
+#no-tracks{text-align:center;padding:24px;color:var(--text3);font-size:13px}
+#no-tracks i{font-size:28px;display:block;margin-bottom:8px}
 
 #drive-status{margin-bottom:10px;padding:10px 12px;border-radius:var(--radius-sm);
   background:var(--bg3);font-size:12px;color:var(--text3)}
@@ -265,7 +268,7 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
         </div>
       </div>
       <div class="panel" id="panel-hist">
-        <div id="history-list"></div>
+        <div id="tracks-list"></div>
       </div>
       <div class="panel" id="panel-drive">
         <div id="drive-status">Não ligado ao Google Drive</div>
@@ -306,7 +309,7 @@ let kmMilestones = [], lastKmMarkers = [];
 let nextKm = 1, kmStartTime = null;
 let importedTrack = null;
 let driveToken = null;
-let history = [];
+let tracks = [];
 let currentTab = 'rec';
 
 // ---- INIT ----
@@ -377,9 +380,9 @@ function startRecording() {
   document.getElementById('stats-bar').classList.add('active');
   timerInterval = setInterval(updateTimer, 1000);
   watchId = navigator.geolocation.watchPosition(onGPS, onGPSErr, {
-    enableHighAccuracy:true, maximumAge:2000, timeout:10000
+    enableHighAccuracy:true, maximumAge:1000, timeout:30000
   });
-  toast('Registo iniciado');
+  toast('Registo iniciado — à procura de sinal GPS');
 }
 
 function stopRecording() {
@@ -454,7 +457,19 @@ function addKmMarker(ms, live) {
   return marker;
 }
 
-function onGPSErr() { if (tracking) toast('Sinal GPS fraco'); }
+function onGPSErr(err) {
+  if (!tracking) return;
+  if (err && err.code === 1) {
+    toast('Permissão de localização negada');
+    stopRecording();
+  } else if (err && err.code === 2) {
+    toast('Posição indisponível — verifica o GPS');
+  } else if (err && err.code === 3) {
+    toast('GPS demorou a responder, a tentar...');
+  } else {
+    toast('Sinal GPS fraco');
+  }
+}
 
 function setGPSMarker(lat, lng) {
   if (!map._gpsM) {
@@ -539,7 +554,7 @@ function saveTrack() {
     kmMilestones,
     points: recordedPoints
   };
-  history.unshift(track);
+  tracks.unshift(track);
   saveHistory();
   renderHistory();
   toast('Percurso guardado');
@@ -547,20 +562,20 @@ function saveTrack() {
 }
 
 function loadHistory() {
-  try { history = JSON.parse(localStorage.getItem('trilhos_history')||'[]'); } catch(e){ history=[]; }
+  try { tracks = JSON.parse(localStorage.getItem('trilhos_history')||'[]'); } catch(e){ tracks=[]; }
 }
 
 function saveHistory() {
-  localStorage.setItem('trilhos_history', JSON.stringify(history));
+  localStorage.setItem('trilhos_history', JSON.stringify(tracks));
 }
 
 function renderHistory() {
-  const el = document.getElementById('history-list');
-  if (!history.length) {
-    el.innerHTML = '<div id="no-history"><i class="ti ti-route-off"></i>Ainda sem percursos registados</div>';
+  const el = document.getElementById('tracks-list');
+  if (!tracks.length) {
+    el.innerHTML = '<div id="no-tracks"><i class="ti ti-route-off"></i>Ainda sem percursos registados</div>';
     return;
   }
-  el.innerHTML = history.map(t => `
+  el.innerHTML = tracks.map(t => `
     <div class="hist-item" onclick="showTrack('${t.id}')">
       <div class="hist-icon"><i class="ti ti-${t.type==='bike'?'bike':'walk'}"></i></div>
       <div class="hist-info">
@@ -575,7 +590,7 @@ function renderHistory() {
 }
 
 function showTrack(id) {
-  const t = history.find(x => x.id === id);
+  const t = tracks.find(x => x.id === id);
   if (!t || t.points.length < 2) return;
   lastKmMarkers.forEach(m => map.removeLayer(m));
   lastKmMarkers = [];
@@ -695,14 +710,14 @@ function drawElevChart(points) {
 
 function deleteTrack(id) {
   if (!confirm('Apagar este percurso?')) return;
-  history = history.filter(t => t.id !== id);
+  tracks = tracks.filter(t => t.id !== id);
   saveHistory();
   renderHistory();
 }
 
 // ---- GPX EXPORT ----
 function exportGPX(id) {
-  const t = history.find(x => x.id === id);
+  const t = tracks.find(x => x.id === id);
   if (!t) return;
   const blob = new Blob([buildGPX(t)], {type:'application/gpx+xml'});
   const a = document.createElement('a');
@@ -757,7 +772,7 @@ function checkOAuthCallback() {
   if (token) {
     driveToken = token;
     sessionStorage.setItem('drive_token', token);
-    history.replaceState(null,'',location.pathname);
+    window.history.replaceState(null,'',location.pathname);
     setDriveConnected();
     toast('Google Drive ligado');
     setTimeout(async () => { await migrateLocalToDrive(); await loadHistoryFromDrive(); }, 1000);
@@ -783,7 +798,7 @@ async function syncToDrive(track) {
 }
 
 async function saveHistoryToDrive(folderId) {
-  const content = JSON.stringify(history);
+  const content = JSON.stringify(tracks);
   const existing = await driveAPI(`files?q=name='trilhos_history.json' and '${folderId}' in parents and trashed=false&fields=files(id)`);
   if (existing.files && existing.files.length > 0) {
     await fetch(`https://www.googleapis.com/upload/drive/v3/files/${existing.files[0].id}?uploadType=media`, {
@@ -808,10 +823,10 @@ async function loadHistoryFromDrive() {
     });
     const data = await fileRes.json();
     if (Array.isArray(data) && data.length > 0) {
-      const localIds = new Set(history.map(t => t.id));
+      const localIds = new Set(tracks.map(t => t.id));
       let added = 0;
-      data.forEach(t => { if (!localIds.has(t.id)) { history.push(t); added++; } });
-      history.sort((a,b) => new Date(b.date)-new Date(a.date));
+      data.forEach(t => { if (!localIds.has(t.id)) { tracks.push(t); added++; } });
+      tracks.sort((a,b) => new Date(b.date)-new Date(a.date));
       saveHistory();
       renderHistory();
       toast(added > 0 ? `${added} percurso(s) carregado(s)` : 'Historico ja actualizado');
@@ -820,12 +835,12 @@ async function loadHistoryFromDrive() {
 }
 
 async function migrateLocalToDrive() {
-  if (!driveToken || !history.length) return;
+  if (!driveToken || !tracks.length) return;
   try {
     const folderId = await getOrCreateFolder('Trilhos GPS');
     const res = await driveAPI(`files?q=name='trilhos_history.json' and '${folderId}' in parents and trashed=false&fields=files(id)`);
     if (res.files && res.files.length > 0) return;
-    for (const t of history) {
+    for (const t of tracks) {
       await uploadFile(folderId, t.name.replace(/\s+/g,'_')+'_'+t.id+'.gpx', buildGPX(t), 'application/gpx+xml');
     }
     await saveHistoryToDrive(folderId);
@@ -953,18 +968,36 @@ function toast(msg) {
 }
 
 // ---- BOOT ----
-window.addEventListener('load', () => {
+function boot() {
+  init();
+  // multiple invalidateSize attempts to fix blank map after redirect/cache
+  [100, 400, 800, 1500, 2500].forEach(ms => {
+    setTimeout(() => { if (map) map.invalidateSize(); }, ms);
+  });
+  // handle OAuth token in URL hash
+  checkOAuthCallback();
+  // restore saved Drive session
   const savedToken = sessionStorage.getItem('drive_token');
-  if (savedToken) {
+  if (savedToken && !driveToken) {
     driveToken = savedToken;
     setDriveConnected();
-    setTimeout(async () => { await migrateLocalToDrive(); await loadHistoryFromDrive(); }, 800);
+    setTimeout(async () => {
+      try { await migrateLocalToDrive(); await loadHistoryFromDrive(); } catch(e){ console.error(e); }
+    }, 1000);
   }
-  checkOAuthCallback();
-  init();
-  setTimeout(() => { if (map) map.invalidateSize(); }, 300);
-  setTimeout(() => { if (map) map.invalidateSize(); }, 1000);
+}
+
+// fix map when tab becomes visible again (mobile background)
+document.addEventListener('visibilitychange', () => {
+  if (!document.hidden && map) setTimeout(() => map.invalidateSize(), 200);
 });
+
+if (document.readyState === 'complete' || document.readyState === 'interactive') {
+  setTimeout(boot, 1);
+} else {
+  window.addEventListener('load', boot);
+}
+
 </script>
 </body>
 </html>

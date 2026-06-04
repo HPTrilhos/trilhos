@@ -1,0 +1,725 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="theme-color" content="#eaf2fb">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<title>Saúde HP</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.x/dist/tabler-icons.min.css"/>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Spline+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+:root{
+  --bg:#eaf2fb;--bg2:#f5f9fe;--card:#ffffff;
+  --blue:#2d6cdf;--blue2:#5b8eea;--blue3:#1a4fb0;--blue-soft:#e3edfb;
+  --ink:#1a2940;--ink2:#4a5d78;--ink3:#8497b0;
+  --line:#d8e4f3;--line2:#c3d4ec;
+  --ok:#2e9e6b;--warn:#e0a82e;--high:#e06a2e;--danger:#d83a3a;
+  --radius:16px;--radius-sm:10px;
+  --font:'Spline Sans',sans-serif;
+}
+html,body{height:100%;background:var(--bg);color:var(--ink);font-family:var(--font);font-size:14px;overflow:hidden}
+#app{height:100%;display:flex;flex-direction:column;max-width:520px;margin:0 auto;position:relative}
+
+/* HEADER */
+#header{padding:env(safe-area-inset-top,12px) 20px 12px;display:flex;align-items:center;justify-content:space-between;
+  background:linear-gradient(180deg,var(--bg2),transparent)}
+#title{font-size:22px;font-weight:700;color:var(--blue3);letter-spacing:-0.02em;display:flex;align-items:center;gap:8px}
+#title i{font-size:24px;color:var(--blue)}
+#auth-btn{display:flex;align-items:center;gap:6px;padding:8px 14px;background:var(--card);
+  border:1px solid var(--line2);border-radius:20px;color:var(--ink2);font-family:var(--font);
+  font-size:12px;font-weight:500;cursor:pointer;transition:all 0.2s;box-shadow:0 1px 3px rgba(45,108,223,0.06)}
+#auth-btn:hover{border-color:var(--blue2);color:var(--blue)}
+#auth-btn i{font-size:16px}
+
+/* CONTENT */
+#content{flex:1;overflow-y:auto;padding:8px 16px 90px}
+.view{display:none}.view.active{display:block}
+
+/* CARDS */
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 8px rgba(45,108,223,0.05)}
+.card-title{font-size:13px;font-weight:600;color:var(--ink3);text-transform:uppercase;
+  letter-spacing:0.05em;margin-bottom:14px;display:flex;align-items:center;gap:7px}
+.card-title i{font-size:16px;color:var(--blue)}
+
+/* LATEST READING BIG */
+.big-reading{display:flex;align-items:baseline;gap:6px;margin-bottom:4px}
+.big-val{font-size:38px;font-weight:700;color:var(--blue3);letter-spacing:-0.02em;line-height:1}
+.big-unit{font-size:15px;color:var(--ink3);font-weight:500}
+.big-sub{font-size:12px;color:var(--ink3)}
+.reading-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-top:6px}
+.rg-item{text-align:center;padding:10px 6px;background:var(--bg2);border-radius:var(--radius-sm)}
+.rg-val{font-size:22px;font-weight:700;color:var(--ink);line-height:1.1}
+.rg-lbl{font-size:10px;color:var(--ink3);margin-top:3px;text-transform:uppercase;letter-spacing:0.04em}
+
+/* BP CATEGORY BADGE */
+.bp-cat{display:inline-flex;align-items:center;gap:5px;padding:4px 11px;border-radius:20px;
+  font-size:12px;font-weight:600;margin-top:8px}
+.cat-ok{background:rgba(46,158,107,0.12);color:var(--ok)}
+.cat-norm{background:rgba(46,158,107,0.1);color:var(--ok)}
+.cat-elev{background:rgba(224,168,46,0.14);color:var(--warn)}
+.cat-h1{background:rgba(224,106,46,0.14);color:var(--high)}
+.cat-h2{background:rgba(216,58,58,0.13);color:var(--danger)}
+.cat-h3{background:rgba(216,58,58,0.2);color:var(--danger)}
+
+/* FORM */
+.field{margin-bottom:14px}
+.field label{display:block;font-size:12px;font-weight:500;color:var(--ink2);margin-bottom:6px}
+.field input,.field textarea{width:100%;background:var(--bg2);border:1px solid var(--line2);
+  border-radius:var(--radius-sm);padding:13px 14px;color:var(--ink);font-family:var(--font);
+  font-size:16px;transition:border 0.2s}
+.field input:focus,.field textarea:focus{outline:none;border-color:var(--blue);background:#fff}
+.field-row{display:flex;gap:10px}
+.field-row .field{flex:1}
+.field textarea{height:60px;resize:none;font-size:14px}
+.input-suffix{position:relative}
+.input-suffix .suffix{position:absolute;right:14px;top:50%;transform:translateY(-50%);
+  color:var(--ink3);font-size:13px;pointer-events:none}
+
+.btn{width:100%;padding:14px;border-radius:var(--radius-sm);border:none;font-family:var(--font);
+  font-size:15px;font-weight:600;cursor:pointer;transition:all 0.2s;display:flex;
+  align-items:center;justify-content:center;gap:8px}
+.btn-primary{background:var(--blue);color:#fff}
+.btn-primary:hover{background:var(--blue3)}
+.btn-ghost{background:var(--bg2);color:var(--ink2);border:1px solid var(--line2)}
+.btn-ghost:hover{border-color:var(--blue2);color:var(--blue)}
+.btn i{font-size:18px}
+
+/* CHART */
+.chart-wrap{position:relative;width:100%;height:200px;margin-top:6px}
+canvas{display:block;width:100%;height:100%}
+.chart-legend{display:flex;gap:16px;justify-content:center;margin-top:10px;flex-wrap:wrap}
+.leg{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--ink2)}
+.leg .dot{width:9px;height:9px;border-radius:50%}
+
+.metric-pills{display:flex;gap:6px;overflow-x:auto;padding-bottom:6px;margin-bottom:10px;-ms-overflow-style:none;scrollbar-width:none}
+.metric-pills::-webkit-scrollbar{display:none}
+.pill{flex-shrink:0;padding:7px 13px;border-radius:18px;background:var(--bg2);border:1px solid var(--line2);
+  font-size:12px;font-weight:500;color:var(--ink2);cursor:pointer;white-space:nowrap;transition:all 0.15s}
+.pill.active{background:var(--blue);color:#fff;border-color:var(--blue)}
+
+/* HISTORY */
+.hist-row{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--line)}
+.hist-row:last-child{border-bottom:none}
+.hist-icon{width:38px;height:38px;border-radius:11px;background:var(--blue-soft);display:flex;
+  align-items:center;justify-content:center;color:var(--blue);font-size:19px;flex-shrink:0}
+.hist-main{flex:1;min-width:0}
+.hist-val{font-size:15px;font-weight:600;color:var(--ink)}
+.hist-date{font-size:11px;color:var(--ink3);margin-top:1px}
+.hist-del{background:none;border:none;color:var(--ink3);cursor:pointer;padding:8px;font-size:17px;border-radius:8px}
+.hist-del:hover{color:var(--danger);background:rgba(216,58,58,0.08)}
+.empty{text-align:center;padding:36px 20px;color:var(--ink3)}
+.empty i{font-size:36px;display:block;margin-bottom:10px;opacity:0.5}
+
+/* TABBAR */
+#tabbar{position:absolute;bottom:0;left:0;right:0;display:flex;background:var(--card);
+  border-top:1px solid var(--line);padding:8px 8px env(safe-area-inset-bottom,8px);
+  box-shadow:0 -2px 12px rgba(45,108,223,0.06)}
+.tab{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:8px 4px;
+  cursor:pointer;color:var(--ink3);transition:color 0.2s;border:none;background:none;font-family:var(--font)}
+.tab i{font-size:22px}
+.tab span{font-size:10px;font-weight:500}
+.tab.active{color:var(--blue)}
+
+/* TOAST */
+#toast{position:absolute;bottom:90px;left:50%;transform:translateX(-50%);background:var(--ink);
+  color:#fff;padding:11px 20px;border-radius:22px;font-size:13px;font-weight:500;opacity:0;
+  transition:opacity 0.3s;pointer-events:none;white-space:nowrap;z-index:50;box-shadow:0 4px 16px rgba(26,41,64,0.25)}
+#toast.show{opacity:1}
+
+/* MODAL */
+.modal{position:absolute;inset:0;background:rgba(26,41,64,0.4);z-index:60;display:flex;
+  align-items:flex-end;justify-content:center;backdrop-filter:blur(3px)}
+.modal-box{background:var(--card);border-radius:var(--radius) var(--radius) 0 0;padding:22px 20px;
+  width:100%;max-width:520px;max-height:85%;overflow-y:auto;animation:slideUp 0.25s ease}
+@keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.modal-title{font-size:18px;font-weight:700;color:var(--blue3);margin-bottom:16px}
+
+.drive-info{display:flex;align-items:center;gap:10px;padding:11px 0;border-bottom:1px solid var(--line);font-size:13px;color:var(--ink2)}
+.drive-info:last-child{border-bottom:none}
+.drive-info i{color:var(--blue);font-size:18px;width:22px;text-align:center}
+#drive-state{padding:11px 14px;border-radius:var(--radius-sm);background:var(--bg2);font-size:13px;
+  color:var(--ink3);margin-bottom:12px}
+#drive-state.on{background:var(--blue-soft);color:var(--blue3);font-weight:500}
+.ver-tag{text-align:right;font-size:11px;color:var(--ink3);margin-top:14px}
+</style>
+</head>
+<body>
+<div id="app">
+  <div id="header">
+    <div id="title"><i class="ti ti-heartbeat"></i>Saúde HP</div>
+    <button id="auth-btn" onclick="handleAuth()">
+      <i class="ti ti-brand-google"></i><span id="auth-label">Ligar Drive</span>
+    </button>
+  </div>
+
+  <div id="content">
+    <!-- DASHBOARD -->
+    <div class="view active" id="view-home">
+      <div class="card" id="home-bp">
+        <div class="card-title"><i class="ti ti-heart-rate-monitor"></i>Tensão arterial</div>
+        <div id="bp-latest"></div>
+      </div>
+      <div class="card" id="home-scale">
+        <div class="card-title"><i class="ti ti-scale"></i>Composição corporal</div>
+        <div id="scale-latest"></div>
+      </div>
+    </div>
+
+    <!-- CARDIOVASCULAR -->
+    <div class="view" id="view-bp">
+      <div class="card">
+        <div class="card-title"><i class="ti ti-plus"></i>Nova medição de tensão</div>
+        <div class="field-row">
+          <div class="field">
+            <label>Sistólica</label>
+            <div class="input-suffix"><input type="number" id="bp-sys" inputmode="numeric" placeholder="120"><span class="suffix">mmHg</span></div>
+          </div>
+          <div class="field">
+            <label>Diastólica</label>
+            <div class="input-suffix"><input type="number" id="bp-dia" inputmode="numeric" placeholder="80"><span class="suffix">mmHg</span></div>
+          </div>
+        </div>
+        <div class="field">
+          <label>Pulsação</label>
+          <div class="input-suffix"><input type="number" id="bp-pulse" inputmode="numeric" placeholder="70"><span class="suffix">bpm</span></div>
+        </div>
+        <div class="field">
+          <label>Data e hora</label>
+          <input type="datetime-local" id="bp-when">
+        </div>
+        <div class="field">
+          <label>Nota (opcional)</label>
+          <textarea id="bp-note" placeholder="ex: antes do pequeno-almoço"></textarea>
+        </div>
+        <button class="btn btn-primary" onclick="saveBP()"><i class="ti ti-check"></i>Registar medição</button>
+      </div>
+      <div class="card">
+        <div class="card-title"><i class="ti ti-chart-line"></i>Evolução · zonas clínicas</div>
+        <div class="chart-wrap"><canvas id="bp-chart"></canvas></div>
+        <div class="chart-legend">
+          <div class="leg"><span class="dot" style="background:var(--blue)"></span>Sistólica</div>
+          <div class="leg"><span class="dot" style="background:var(--blue2)"></span>Diastólica</div>
+          <div class="leg"><span class="dot" style="background:#c9a4e0"></span>Pulsação</div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title"><i class="ti ti-history"></i>Histórico</div>
+        <div id="bp-history"></div>
+      </div>
+    </div>
+
+    <!-- BALANÇA -->
+    <div class="view" id="view-scale">
+      <div class="card">
+        <div class="card-title"><i class="ti ti-plus"></i>Nova pesagem</div>
+        <div class="field-row">
+          <div class="field"><label>Peso</label><div class="input-suffix"><input type="number" step="0.1" id="sc-weight" inputmode="decimal" placeholder="70.0"><span class="suffix">kg</span></div></div>
+          <div class="field"><label>IMC</label><div class="input-suffix"><input type="number" step="0.1" id="sc-bmi" inputmode="decimal" placeholder="22.5"></div></div>
+        </div>
+        <div class="field-row">
+          <div class="field"><label>Gordura corporal</label><div class="input-suffix"><input type="number" step="0.1" id="sc-fat" inputmode="decimal" placeholder="18.0"><span class="suffix">%</span></div></div>
+          <div class="field"><label>Massa muscular</label><div class="input-suffix"><input type="number" step="0.1" id="sc-muscle" inputmode="decimal" placeholder="55.0"><span class="suffix">kg</span></div></div>
+        </div>
+        <div class="field-row">
+          <div class="field"><label>Água</label><div class="input-suffix"><input type="number" step="0.1" id="sc-water" inputmode="decimal" placeholder="55.0"><span class="suffix">%</span></div></div>
+          <div class="field"><label>Massa óssea</label><div class="input-suffix"><input type="number" step="0.1" id="sc-bone" inputmode="decimal" placeholder="3.0"><span class="suffix">kg</span></div></div>
+        </div>
+        <div class="field-row">
+          <div class="field"><label>Gordura visceral</label><div class="input-suffix"><input type="number" step="1" id="sc-visceral" inputmode="numeric" placeholder="8"></div></div>
+          <div class="field"><label>Proteína</label><div class="input-suffix"><input type="number" step="0.1" id="sc-protein" inputmode="decimal" placeholder="17.0"><span class="suffix">%</span></div></div>
+        </div>
+        <div class="field"><label>Metabolismo basal (BMR)</label><div class="input-suffix"><input type="number" step="1" id="sc-bmr" inputmode="numeric" placeholder="1600"><span class="suffix">kcal</span></div></div>
+        <div class="field"><label>Data e hora</label><input type="datetime-local" id="sc-when"></div>
+        <button class="btn btn-primary" onclick="saveScale()"><i class="ti ti-check"></i>Registar pesagem</button>
+      </div>
+      <div class="card">
+        <div class="card-title"><i class="ti ti-chart-line"></i>Evolução</div>
+        <div class="metric-pills" id="scale-pills"></div>
+        <div class="chart-wrap"><canvas id="scale-chart"></canvas></div>
+      </div>
+      <div class="card">
+        <div class="card-title"><i class="ti ti-history"></i>Histórico</div>
+        <div id="scale-history"></div>
+      </div>
+    </div>
+
+    <!-- DRIVE -->
+    <div class="view" id="view-drive">
+      <div class="card">
+        <div class="card-title"><i class="ti ti-cloud"></i>Google Drive</div>
+        <div id="drive-state">Não ligado</div>
+        <button class="btn btn-ghost" onclick="loadFromDrive()" style="margin-bottom:8px"><i class="ti ti-refresh"></i>Sincronizar do Drive</button>
+        <button class="btn btn-ghost" onclick="exportCSV()" style="margin-bottom:8px"><i class="ti ti-file-spreadsheet"></i>Exportar CSV</button>
+        <button class="btn btn-ghost" onclick="showPublish()"><i class="ti ti-tag"></i>Publicar versão</button>
+      </div>
+      <div class="card">
+        <div class="card-title"><i class="ti ti-info-circle"></i>Sobre</div>
+        <div class="drive-info"><i class="ti ti-folder"></i><span>Dados guardados em <em>Saúde HP/</em> no Drive</span></div>
+        <div class="drive-info"><i class="ti ti-heart-rate-monitor"></i><span>Tensão com zonas clínicas ESC/ESH</span></div>
+        <div class="drive-info"><i class="ti ti-scale"></i><span>Composição corporal Huawei Scale 3</span></div>
+        <div class="drive-info"><i class="ti ti-device-mobile"></i><span>Acesso em qualquer dispositivo</span></div>
+        <div class="ver-tag">versão r2026.00</div>
+      </div>
+    </div>
+  </div>
+
+  <div id="tabbar">
+    <button class="tab active" onclick="switchView('home')"><i class="ti ti-layout-dashboard"></i><span>Resumo</span></button>
+    <button class="tab" onclick="switchView('bp')"><i class="ti ti-heart-rate-monitor"></i><span>Tensão</span></button>
+    <button class="tab" onclick="switchView('scale')"><i class="ti ti-scale"></i><span>Balança</span></button>
+    <button class="tab" onclick="switchView('drive')"><i class="ti ti-cloud"></i><span>Drive</span></button>
+  </div>
+
+  <div id="toast"></div>
+</div>
+
+<script>
+const GOOGLE_CLIENT_ID = '271389330523-4jg4e39cgf31v7mecjabj4hji6pjug1k.apps.googleusercontent.com';
+const DRIVE_SCOPE = 'https://www.googleapis.com/auth/drive.file';
+const APP_VERSION = 'r2026.00';
+
+let bpReadings = [];
+let scaleReadings = [];
+let driveToken = null;
+let currentView = 'home';
+let scaleMetric = 'weight';
+
+const SCALE_METRICS = [
+  {key:'weight', label:'Peso', unit:'kg'},
+  {key:'bmi', label:'IMC', unit:''},
+  {key:'fat', label:'Gordura', unit:'%'},
+  {key:'muscle', label:'Músculo', unit:'kg'},
+  {key:'water', label:'Água', unit:'%'},
+  {key:'bone', label:'Osso', unit:'kg'},
+  {key:'visceral', label:'Visceral', unit:''},
+  {key:'protein', label:'Proteína', unit:'%'},
+  {key:'bmr', label:'BMR', unit:'kcal'}
+];
+
+// ---- BP CATEGORY (ESC/ESH) ----
+function bpCategory(sys, dia) {
+  if (sys >= 180 || dia >= 110) return {name:'Hipertensão grau 3', cls:'cat-h3'};
+  if (sys >= 160 || dia >= 100) return {name:'Hipertensão grau 2', cls:'cat-h2'};
+  if (sys >= 140 || dia >= 90)  return {name:'Hipertensão grau 1', cls:'cat-h1'};
+  if (sys >= 130 || dia >= 85)  return {name:'Normal-alta', cls:'cat-elev'};
+  if (sys >= 120 || dia >= 80)  return {name:'Normal', cls:'cat-norm'};
+  return {name:'Óptima', cls:'cat-ok'};
+}
+
+// ---- VIEW SWITCH ----
+function switchView(v) {
+  currentView = v;
+  document.querySelectorAll('.view').forEach(x => x.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(x => x.classList.remove('active'));
+  document.getElementById('view-'+v).classList.add('active');
+  const order = ['home','bp','scale','drive'];
+  document.querySelectorAll('.tab')[order.indexOf(v)].classList.add('active');
+  document.getElementById('content').scrollTop = 0;
+  if (v === 'home') renderHome();
+  if (v === 'bp') { renderBPHistory(); drawBPChart(); }
+  if (v === 'scale') { renderScalePills(); renderScaleHistory(); drawScaleChart(); }
+}
+
+// ---- SAVE BP ----
+function saveBP() {
+  const sys = parseInt(document.getElementById('bp-sys').value);
+  const dia = parseInt(document.getElementById('bp-dia').value);
+  const pulse = parseInt(document.getElementById('bp-pulse').value);
+  const when = document.getElementById('bp-when').value;
+  const note = document.getElementById('bp-note').value.trim();
+  if (!sys || !dia) { toast('Preenche sistólica e diastólica'); return; }
+  const r = {
+    id: Date.now().toString(),
+    sys, dia, pulse: pulse||null,
+    date: when ? new Date(when).toISOString() : new Date().toISOString(),
+    note
+  };
+  bpReadings.unshift(r);
+  bpReadings.sort((a,b)=>new Date(b.date)-new Date(a.date));
+  saveLocal();
+  document.getElementById('bp-sys').value='';
+  document.getElementById('bp-dia').value='';
+  document.getElementById('bp-pulse').value='';
+  document.getElementById('bp-note').value='';
+  setDefaultDates();
+  renderBPHistory(); drawBPChart();
+  toast('Medição registada');
+  if (driveToken) syncToDrive();
+}
+
+// ---- SAVE SCALE ----
+function saveScale() {
+  const g = id => { const v = parseFloat(document.getElementById(id).value); return isNaN(v)?null:v; };
+  const weight = g('sc-weight');
+  if (!weight) { toast('Preenche pelo menos o peso'); return; }
+  const when = document.getElementById('sc-when').value;
+  const r = {
+    id: Date.now().toString(),
+    weight, bmi:g('sc-bmi'), fat:g('sc-fat'), muscle:g('sc-muscle'),
+    water:g('sc-water'), bone:g('sc-bone'), visceral:g('sc-visceral'),
+    protein:g('sc-protein'), bmr:g('sc-bmr'),
+    date: when ? new Date(when).toISOString() : new Date().toISOString()
+  };
+  scaleReadings.unshift(r);
+  scaleReadings.sort((a,b)=>new Date(b.date)-new Date(a.date));
+  saveLocal();
+  ['sc-weight','sc-bmi','sc-fat','sc-muscle','sc-water','sc-bone','sc-visceral','sc-protein','sc-bmr'].forEach(id=>document.getElementById(id).value='');
+  setDefaultDates();
+  renderScaleHistory(); drawScaleChart();
+  toast('Pesagem registada');
+  if (driveToken) syncToDrive();
+}
+
+// ---- HOME ----
+function renderHome() {
+  const bpEl = document.getElementById('bp-latest');
+  if (bpReadings.length === 0) {
+    bpEl.innerHTML = '<div class="empty"><i class="ti ti-heart-rate-monitor"></i>Sem medições ainda</div>';
+  } else {
+    const r = bpReadings[0];
+    const cat = bpCategory(r.sys, r.dia);
+    bpEl.innerHTML = `
+      <div class="big-reading"><span class="big-val">${r.sys}/${r.dia}</span><span class="big-unit">mmHg</span></div>
+      <div class="big-sub">${fmtDateTime(new Date(r.date))}${r.pulse?' · '+r.pulse+' bpm':''}</div>
+      <span class="bp-cat ${cat.cls}">${cat.name}</span>`;
+  }
+  const scEl = document.getElementById('scale-latest');
+  if (scaleReadings.length === 0) {
+    scEl.innerHTML = '<div class="empty"><i class="ti ti-scale"></i>Sem pesagens ainda</div>';
+  } else {
+    const r = scaleReadings[0];
+    scEl.innerHTML = `
+      <div class="big-reading"><span class="big-val">${r.weight}</span><span class="big-unit">kg</span></div>
+      <div class="big-sub">${fmtDateTime(new Date(r.date))}</div>
+      <div class="reading-grid">
+        ${r.fat!=null?`<div class="rg-item"><div class="rg-val">${r.fat}%</div><div class="rg-lbl">Gordura</div></div>`:''}
+        ${r.muscle!=null?`<div class="rg-item"><div class="rg-val">${r.muscle}</div><div class="rg-lbl">Músculo kg</div></div>`:''}
+        ${r.bmi!=null?`<div class="rg-item"><div class="rg-val">${r.bmi}</div><div class="rg-lbl">IMC</div></div>`:''}
+        ${r.water!=null?`<div class="rg-item"><div class="rg-val">${r.water}%</div><div class="rg-lbl">Água</div></div>`:''}
+        ${r.visceral!=null?`<div class="rg-item"><div class="rg-val">${r.visceral}</div><div class="rg-lbl">Visceral</div></div>`:''}
+        ${r.bmr!=null?`<div class="rg-item"><div class="rg-val">${r.bmr}</div><div class="rg-lbl">BMR kcal</div></div>`:''}
+      </div>`;
+  }
+}
+
+// ---- BP HISTORY ----
+function renderBPHistory() {
+  const el = document.getElementById('bp-history');
+  if (bpReadings.length === 0) { el.innerHTML = '<div class="empty"><i class="ti ti-history"></i>Sem registos</div>'; return; }
+  el.innerHTML = bpReadings.map(r => {
+    const cat = bpCategory(r.sys, r.dia);
+    return `<div class="hist-row">
+      <div class="hist-icon"><i class="ti ti-heart-rate-monitor"></i></div>
+      <div class="hist-main">
+        <div class="hist-val">${r.sys}/${r.dia} <span style="font-size:12px;color:var(--ink3);font-weight:400">mmHg${r.pulse?' · '+r.pulse+' bpm':''}</span></div>
+        <div class="hist-date">${fmtDateTime(new Date(r.date))} · <span style="color:var(--ink2)">${cat.name}</span>${r.note?' · '+r.note:''}</div>
+      </div>
+      <button class="hist-del" onclick="delBP('${r.id}')"><i class="ti ti-trash"></i></button>
+    </div>`;
+  }).join('');
+}
+function delBP(id){ if(!confirm('Apagar esta medição?'))return; bpReadings=bpReadings.filter(r=>r.id!==id); saveLocal(); renderBPHistory(); drawBPChart(); if(driveToken)syncToDrive(); }
+
+// ---- SCALE HISTORY ----
+function renderScaleHistory() {
+  const el = document.getElementById('scale-history');
+  if (scaleReadings.length === 0) { el.innerHTML = '<div class="empty"><i class="ti ti-history"></i>Sem registos</div>'; return; }
+  el.innerHTML = scaleReadings.map(r => `
+    <div class="hist-row">
+      <div class="hist-icon"><i class="ti ti-scale"></i></div>
+      <div class="hist-main">
+        <div class="hist-val">${r.weight} kg ${r.fat!=null?`<span style="font-size:12px;color:var(--ink3);font-weight:400">· ${r.fat}% gordura</span>`:''}</div>
+        <div class="hist-date">${fmtDateTime(new Date(r.date))}</div>
+      </div>
+      <button class="hist-del" onclick="delScale('${r.id}')"><i class="ti ti-trash"></i></button>
+    </div>`).join('');
+}
+function delScale(id){ if(!confirm('Apagar esta pesagem?'))return; scaleReadings=scaleReadings.filter(r=>r.id!==id); saveLocal(); renderScaleHistory(); drawScaleChart(); if(driveToken)syncToDrive(); }
+
+// ---- SCALE PILLS ----
+function renderScalePills() {
+  const el = document.getElementById('scale-pills');
+  el.innerHTML = SCALE_METRICS.map(m =>
+    `<div class="pill ${m.key===scaleMetric?'active':''}" onclick="selectMetric('${m.key}')">${m.label}</div>`
+  ).join('');
+}
+function selectMetric(k){ scaleMetric=k; renderScalePills(); drawScaleChart(); }
+
+// ---- BP CHART with clinical zones ----
+function drawBPChart() {
+  const canvas = document.getElementById('bp-chart');
+  if (!canvas) return;
+  const data = [...bpReadings].reverse();
+  const dpr = window.devicePixelRatio||1;
+  const W = canvas.offsetWidth, H = canvas.offsetHeight;
+  canvas.width = W*dpr; canvas.height = H*dpr;
+  const ctx = canvas.getContext('2d');
+  ctx.scale(dpr,dpr);
+  ctx.clearRect(0,0,W,H);
+  const padL=34, padR=10, padT=10, padB=22;
+  const plotW = W-padL-padR, plotH = H-padT-padB;
+  const yMin=40, yMax=200;
+  const toY = v => padT + plotH - ((v-yMin)/(yMax-yMin))*plotH;
+  // clinical zones (sys reference bands)
+  const zones = [
+    {from:40, to:120, color:'rgba(46,158,107,0.08)'},
+    {from:120, to:130, color:'rgba(46,158,107,0.12)'},
+    {from:130, to:140, color:'rgba(224,168,46,0.12)'},
+    {from:140, to:160, color:'rgba(224,106,46,0.12)'},
+    {from:160, to:180, color:'rgba(216,58,58,0.10)'},
+    {from:180, to:200, color:'rgba(216,58,58,0.16)'}
+  ];
+  zones.forEach(z => { ctx.fillStyle=z.color; const y1=toY(z.to),y2=toY(z.from); ctx.fillRect(padL,y1,plotW,y2-y1); });
+  // gridlines + labels
+  ctx.fillStyle='#8497b0'; ctx.font='10px Spline Sans'; ctx.textAlign='right';
+  [60,90,120,150,180].forEach(v => {
+    const y=toY(v); ctx.strokeStyle='rgba(216,228,243,0.6)'; ctx.beginPath(); ctx.moveTo(padL,y); ctx.lineTo(W-padR,y); ctx.stroke();
+    ctx.fillText(v, padL-5, y+3);
+  });
+  if (data.length === 0) { ctx.fillStyle='#8497b0'; ctx.textAlign='center'; ctx.fillText('Sem dados', W/2, H/2); return; }
+  const n = data.length;
+  const toX = i => n===1 ? padL+plotW/2 : padL + (i/(n-1))*plotW;
+  function plotLine(key, color) {
+    ctx.beginPath();
+    data.forEach((r,i) => { const v=r[key]; if(v==null)return; const x=toX(i),y=toY(v); i===0?ctx.moveTo(x,y):ctx.lineTo(x,y); });
+    ctx.strokeStyle=color; ctx.lineWidth=2.5; ctx.lineJoin='round'; ctx.stroke();
+    data.forEach((r,i) => { const v=r[key]; if(v==null)return; ctx.beginPath(); ctx.arc(toX(i),toY(v),3.2,0,7); ctx.fillStyle=color; ctx.fill(); ctx.strokeStyle='#fff'; ctx.lineWidth=1.5; ctx.stroke(); });
+  }
+  plotLine('sys','#2d6cdf');
+  plotLine('dia','#5b8eea');
+  plotLine('pulse','#c9a4e0');
+}
+
+// ---- SCALE CHART ----
+function drawScaleChart() {
+  const canvas = document.getElementById('scale-chart');
+  if (!canvas) return;
+  const data = [...scaleReadings].reverse().filter(r => r[scaleMetric]!=null);
+  const dpr = window.devicePixelRatio||1;
+  const W = canvas.offsetWidth, H = canvas.offsetHeight;
+  canvas.width=W*dpr; canvas.height=H*dpr;
+  const ctx = canvas.getContext('2d'); ctx.scale(dpr,dpr); ctx.clearRect(0,0,W,H);
+  const padL=38,padR=10,padT=12,padB=22;
+  const plotW=W-padL-padR, plotH=H-padT-padB;
+  if (data.length===0){ ctx.fillStyle='#8497b0'; ctx.font='12px Spline Sans'; ctx.textAlign='center'; ctx.fillText('Sem dados desta métrica', W/2,H/2); return; }
+  const vals = data.map(r=>r[scaleMetric]);
+  let vMin=Math.min(...vals), vMax=Math.max(...vals);
+  const pad=(vMax-vMin)*0.15||1; vMin-=pad; vMax+=pad;
+  const toY=v=>padT+plotH-((v-vMin)/(vMax-vMin))*plotH;
+  const n=data.length, toX=i=> n===1?padL+plotW/2:padL+(i/(n-1))*plotW;
+  ctx.fillStyle='#8497b0'; ctx.font='10px Spline Sans'; ctx.textAlign='right';
+  for(let k=0;k<=3;k++){ const v=vMin+(vMax-vMin)*k/3; const y=toY(v); ctx.strokeStyle='rgba(216,228,243,0.6)'; ctx.beginPath(); ctx.moveTo(padL,y); ctx.lineTo(W-padR,y); ctx.stroke(); ctx.fillText(v.toFixed(1),padL-5,y+3); }
+  // area fill
+  ctx.beginPath();
+  data.forEach((r,i)=>{const x=toX(i),y=toY(r[scaleMetric]); i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);});
+  ctx.lineTo(toX(n-1),padT+plotH); ctx.lineTo(toX(0),padT+plotH); ctx.closePath();
+  ctx.fillStyle='rgba(45,108,223,0.1)'; ctx.fill();
+  // line
+  ctx.beginPath();
+  data.forEach((r,i)=>{const x=toX(i),y=toY(r[scaleMetric]); i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);});
+  ctx.strokeStyle='#2d6cdf'; ctx.lineWidth=2.5; ctx.lineJoin='round'; ctx.stroke();
+  data.forEach((r,i)=>{ctx.beginPath();ctx.arc(toX(i),toY(r[scaleMetric]),3.2,0,7);ctx.fillStyle='#2d6cdf';ctx.fill();ctx.strokeStyle='#fff';ctx.lineWidth=1.5;ctx.stroke();});
+}
+
+// ---- STORAGE ----
+function saveLocal() {
+  localStorage.setItem('saude_bp', JSON.stringify(bpReadings));
+  localStorage.setItem('saude_scale', JSON.stringify(scaleReadings));
+}
+function loadLocal() {
+  try { bpReadings = JSON.parse(localStorage.getItem('saude_bp')||'[]'); } catch(e){ bpReadings=[]; }
+  try { scaleReadings = JSON.parse(localStorage.getItem('saude_scale')||'[]'); } catch(e){ scaleReadings=[]; }
+}
+
+// ---- AUTH ----
+function handleAuth() {
+  if (driveToken) { signOut(); return; }
+  const params = new URLSearchParams({
+    client_id: GOOGLE_CLIENT_ID,
+    redirect_uri: location.origin + location.pathname,
+    response_type: 'token', scope: DRIVE_SCOPE, prompt: 'select_account'
+  });
+  location.href = 'https://accounts.google.com/o/oauth2/v2/auth?' + params;
+}
+function signOut() {
+  driveToken=null; sessionStorage.removeItem('saude_token');
+  document.getElementById('auth-label').textContent='Ligar Drive';
+  document.getElementById('auth-btn').querySelector('i').className='ti ti-brand-google';
+  document.getElementById('drive-state').textContent='Não ligado';
+  document.getElementById('drive-state').className='';
+  toast('Drive desligado');
+}
+function checkOAuth() {
+  if (!location.hash.includes('access_token')) return;
+  const p = new URLSearchParams(location.hash.substring(1));
+  const token = p.get('access_token');
+  if (token) {
+    driveToken = token;
+    sessionStorage.setItem('saude_token', token);
+    window.history.replaceState(null,'',location.pathname);
+    setDriveOn();
+    toast('Google Drive ligado');
+    setTimeout(async()=>{ await migrateToDrive(); await loadFromDrive(); }, 1000);
+  }
+}
+function setDriveOn() {
+  document.getElementById('auth-label').textContent='Drive ligado';
+  document.getElementById('auth-btn').querySelector('i').className='ti ti-cloud-check';
+  document.getElementById('drive-state').textContent='✓ Ligado ao Google Drive';
+  document.getElementById('drive-state').className='on';
+}
+
+// ---- DRIVE ----
+async function syncToDrive() {
+  if (!driveToken) return;
+  try {
+    const folderId = await getFolder('Saúde HP');
+    await saveDataToDrive(folderId);
+    toast('Sincronizado com Drive');
+  } catch(e){ console.error(e); toast('Erro ao sincronizar'); }
+}
+async function saveDataToDrive(folderId) {
+  const content = JSON.stringify({bp:bpReadings, scale:scaleReadings, updated:new Date().toISOString()});
+  const ex = await driveAPI(`files?q=name='saude_dados.json' and '${folderId}' in parents and trashed=false&fields=files(id)`);
+  if (ex.files && ex.files.length>0) {
+    await fetch(`https://www.googleapis.com/upload/drive/v3/files/${ex.files[0].id}?uploadType=media`,{
+      method:'PATCH', headers:{Authorization:`Bearer ${driveToken}`,'Content-Type':'application/json'}, body:content});
+  } else {
+    await uploadFile(folderId,'saude_dados.json',content,'application/json');
+  }
+}
+async function loadFromDrive() {
+  if (!driveToken) { toast('Liga o Drive primeiro'); return; }
+  try {
+    toast('A carregar do Drive...');
+    const folderId = await getFolder('Saúde HP');
+    const res = await driveAPI(`files?q=name='saude_dados.json' and '${folderId}' in parents and trashed=false&fields=files(id)`);
+    if (!res.files||!res.files.length){ toast('Sem dados no Drive'); return; }
+    const fr = await fetch(`https://www.googleapis.com/drive/v3/files/${res.files[0].id}?alt=media`,{headers:{Authorization:`Bearer ${driveToken}`}});
+    const data = await fr.json();
+    let added=0;
+    if (data.bp) { const ids=new Set(bpReadings.map(r=>r.id)); data.bp.forEach(r=>{if(!ids.has(r.id)){bpReadings.push(r);added++;}}); }
+    if (data.scale) { const ids=new Set(scaleReadings.map(r=>r.id)); data.scale.forEach(r=>{if(!ids.has(r.id)){scaleReadings.push(r);added++;}}); }
+    bpReadings.sort((a,b)=>new Date(b.date)-new Date(a.date));
+    scaleReadings.sort((a,b)=>new Date(b.date)-new Date(a.date));
+    saveLocal();
+    switchView(currentView);
+    toast(added>0?`${added} registo(s) carregado(s)`:'Dados actualizados');
+  } catch(e){ console.error(e); toast('Erro ao carregar'); }
+}
+async function migrateToDrive() {
+  if (!driveToken || (bpReadings.length===0 && scaleReadings.length===0)) return;
+  try {
+    const folderId = await getFolder('Saúde HP');
+    const ex = await driveAPI(`files?q=name='saude_dados.json' and '${folderId}' in parents and trashed=false&fields=files(id)`);
+    if (ex.files && ex.files.length>0) return;
+    await saveDataToDrive(folderId);
+    toast('Dados migrados para o Drive');
+  } catch(e){ console.error(e); }
+}
+
+// ---- CSV EXPORT ----
+function exportCSV() {
+  let csv = 'TENSAO ARTERIAL\ndata,sistolica,diastolica,pulsacao,categoria,nota\n';
+  bpReadings.forEach(r=>{ const c=bpCategory(r.sys,r.dia).name; csv+=`${r.date},${r.sys},${r.dia},${r.pulse||''},${c},"${r.note||''}"\n`; });
+  csv += '\nBALANCA\ndata,peso,imc,gordura%,musculo,agua%,osso,visceral,proteina%,bmr\n';
+  scaleReadings.forEach(r=>{ csv+=`${r.date},${r.weight},${r.bmi||''},${r.fat||''},${r.muscle||''},${r.water||''},${r.bone||''},${r.visceral||''},${r.protein||''},${r.bmr||''}\n`; });
+  const blob = new Blob([csv],{type:'text/csv;charset=utf-8'});
+  const a = document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='saude_hp.csv'; a.click();
+  toast('CSV exportado');
+}
+
+// ---- PUBLISH VERSION ----
+function showPublish() {
+  if (!driveToken) { toast('Liga o Drive primeiro'); return; }
+  const m = document.createElement('div'); m.className='modal'; m.id='pub-modal';
+  m.innerHTML = `<div class="modal-box">
+    <div class="modal-title"><i class="ti ti-tag"></i> Publicar versão</div>
+    <div class="field"><label>Número</label><input id="pub-ver" value="${APP_VERSION}"></div>
+    <div class="field"><label>Notas</label><textarea id="pub-notes" placeholder="Alterações..."></textarea></div>
+    <div style="display:flex;gap:8px">
+      <button class="btn btn-ghost" onclick="document.getElementById('pub-modal').remove()">Cancelar</button>
+      <button class="btn btn-primary" onclick="publishVersion()"><i class="ti ti-upload"></i>Publicar</button>
+    </div></div>`;
+  m.addEventListener('click',e=>{if(e.target===m)m.remove();});
+  document.getElementById('app').appendChild(m);
+}
+async function publishVersion() {
+  const ver = document.getElementById('pub-ver').value.trim();
+  const notes = document.getElementById('pub-notes').value.trim();
+  if (!ver){ toast('Indica o número'); return; }
+  document.getElementById('pub-modal').remove();
+  toast('A publicar...');
+  try {
+    const folderId = await getFolder('Saúde HP');
+    const verFolder = await getFolder('Versões', folderId);
+    await uploadFile(verFolder, `saude_${ver}.html`, document.documentElement.outerHTML, 'text/html');
+    const date = new Date().toLocaleDateString('pt-PT');
+    const entry = `\n## ${ver} — ${date}\n${notes||'(sem notas)'}\n`;
+    const cl = await driveAPI(`files?q=name='saude_changelog.md' and '${folderId}' in parents and trashed=false&fields=files(id)`);
+    if (cl.files && cl.files.length>0) {
+      const prev = await (await fetch(`https://www.googleapis.com/drive/v3/files/${cl.files[0].id}?alt=media`,{headers:{Authorization:`Bearer ${driveToken}`}})).text();
+      await fetch(`https://www.googleapis.com/upload/drive/v3/files/${cl.files[0].id}?uploadType=media`,{method:'PATCH',headers:{Authorization:`Bearer ${driveToken}`,'Content-Type':'text/markdown'},body:prev+entry});
+    } else {
+      await uploadFile(folderId,'saude_changelog.md',`# Saúde HP — Changelog\n${entry}`,'text/markdown');
+    }
+    toast(`Versão ${ver} publicada`);
+  } catch(e){ console.error(e); toast('Erro ao publicar'); }
+}
+
+async function getFolder(name, parentId) {
+  const pq = parentId?` and '${parentId}' in parents`:'';
+  const res = await driveAPI(`files?q=name='${name}' and mimeType='application/vnd.google-apps.folder'${pq} and trashed=false&fields=files(id)`);
+  if (res.files && res.files.length>0) return res.files[0].id;
+  const body={name,mimeType:'application/vnd.google-apps.folder'}; if(parentId)body.parents=[parentId];
+  return (await driveAPI('files','POST',body)).id;
+}
+async function uploadFile(folderId,name,content,mime) {
+  const meta=JSON.stringify({name,mimeType:mime,parents:[folderId]});
+  const b='-------saude_b';
+  const body=`--${b}\r\nContent-Type: application/json\r\n\r\n${meta}\r\n--${b}\r\nContent-Type: ${mime}\r\n\r\n${content}\r\n--${b}--`;
+  await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart',{method:'POST',headers:{Authorization:`Bearer ${driveToken}`,'Content-Type':`multipart/related; boundary=${b}`},body});
+}
+async function driveAPI(path,method='GET',body=null) {
+  const opts={method,headers:{Authorization:`Bearer ${driveToken}`,'Content-Type':'application/json'}};
+  if(body)opts.body=JSON.stringify(body);
+  return (await fetch('https://www.googleapis.com/drive/v3/'+path,opts)).json();
+}
+
+// ---- UTILS ----
+function fmtDateTime(d){ return d.toLocaleDateString('pt-PT',{day:'2-digit',month:'2-digit',year:'numeric'})+' '+d.toLocaleTimeString('pt-PT',{hour:'2-digit',minute:'2-digit'}); }
+function setDefaultDates(){
+  const now=new Date(); const off=now.getTimezoneOffset(); const local=new Date(now.getTime()-off*60000);
+  const v=local.toISOString().slice(0,16);
+  const a=document.getElementById('bp-when'); const b=document.getElementById('sc-when');
+  if(a)a.value=v; if(b)b.value=v;
+}
+let toastTimer;
+function toast(msg){ const el=document.getElementById('toast'); el.textContent=msg; el.classList.add('show'); clearTimeout(toastTimer); toastTimer=setTimeout(()=>el.classList.remove('show'),2600); }
+
+// ---- BOOT ----
+function boot() {
+  loadLocal();
+  setDefaultDates();
+  checkOAuth();
+  const saved = sessionStorage.getItem('saude_token');
+  if (saved && !driveToken) {
+    driveToken=saved; setDriveOn();
+    setTimeout(async()=>{ try{await migrateToDrive(); await loadFromDrive();}catch(e){console.error(e);} },1000);
+  }
+  renderHome();
+}
+if (document.readyState!=='loading') setTimeout(boot,1);
+else window.addEventListener('load',boot);
+</script>
+</body>
+</html>

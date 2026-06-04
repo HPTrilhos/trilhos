@@ -24,57 +24,47 @@
   --text:#e8f0e9;--text2:#b0c4b5;--text3:#7a9882;
   --border:rgba(76,175,110,0.15);--border2:rgba(76,175,110,0.28);
   --radius:12px;--radius-sm:8px;
-  --mono:'Nunito',sans-serif;--serif:'Nunito',sans-serif;
+  --font:'Nunito',sans-serif;
 }
-html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);font-family:'Nunito',sans-serif;font-size:14px}
+html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);font-family:var(--font);font-size:14px}
 
-/* MAP */
 #map{position:fixed;inset:0;z-index:1}
 .leaflet-container{background:#1a2a1d}
 .leaflet-tile{filter:brightness(0.75) saturate(0.6) hue-rotate(20deg)}
 .leaflet-control-zoom{display:none}
 .leaflet-control-attribution{display:none}
 
-/* HEADER */
 #header{position:fixed;top:0;left:0;right:0;z-index:100;
   background:linear-gradient(to bottom,rgba(15,26,18,0.97),rgba(15,26,18,0));
   padding:env(safe-area-inset-top,0) 0 32px;pointer-events:none}
 #header-inner{display:flex;align-items:center;justify-content:space-between;
   padding:16px 20px 0;pointer-events:all}
-#app-title{font-family:var(--serif);font-size:22px;font-weight:300;
-  color:var(--green2);letter-spacing:0.02em}
+#app-title{font-size:22px;font-weight:300;color:var(--green2)}
 #auth-btn{display:flex;align-items:center;gap:6px;padding:8px 14px;
   background:var(--bg3);border:0.5px solid var(--border2);border-radius:20px;
-  color:var(--text2);font-family:var(--mono);font-size:12px;cursor:pointer;
-  transition:all 0.2s}
+  color:var(--text2);font-family:var(--font);font-size:12px;cursor:pointer;transition:all 0.2s}
 #auth-btn:hover{background:var(--bg4);color:var(--green2)}
 #auth-btn i{font-size:16px}
 
-/* STATS BAR (during recording) */
 #stats-bar{position:fixed;top:80px;left:12px;right:12px;z-index:100;
   display:none;background:rgba(15,26,18,0.92);border:0.5px solid var(--border2);
   border-radius:var(--radius);padding:12px 16px;
   backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
 #stats-bar.active{display:flex;gap:0;justify-content:space-between}
 .stat-item{display:flex;flex-direction:column;align-items:center;flex:1}
-.stat-val{font-size:20px;font-weight:500;color:var(--green2);font-family:var(--serif)}
+.stat-val{font-size:20px;font-weight:600;color:var(--green2)}
 .stat-lbl{font-size:10px;color:var(--text3);margin-top:2px;letter-spacing:0.05em;text-transform:uppercase}
 .stat-sep{width:0.5px;background:var(--border);margin:4px 0}
 
-/* OFF-TRACK ALERT */
 #offtrack{position:fixed;top:160px;left:50%;transform:translateX(-50%);z-index:200;
   background:rgba(224,82,82,0.92);color:#fff;padding:8px 18px;border-radius:20px;
-  font-size:12px;font-weight:500;display:none;white-space:nowrap;
-  letter-spacing:0.05em}
+  font-size:12px;font-weight:500;display:none;white-space:nowrap}
 #offtrack.show{display:block}
 
-/* BOTTOM PANEL */
-#bottom{position:fixed;bottom:0;left:0;right:0;z-index:100;
-  padding:0 0 env(safe-area-inset-bottom,0)}
+#bottom{position:fixed;bottom:0;left:0;right:0;z-index:100;padding:0 0 env(safe-area-inset-bottom,0)}
 #bottom-inner{background:rgba(15,26,18,0.97);border-top:0.5px solid var(--border);
   backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px)}
 
-/* TABS */
 #tabs{display:flex;border-bottom:0.5px solid var(--border)}
 .tab{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;
   padding:12px 4px 10px;cursor:pointer;color:var(--text3);transition:color 0.2s}
@@ -85,44 +75,37 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
   width:24px;margin:-2px auto 0;opacity:0;transition:opacity 0.2s}
 .tab.active .tab-indicator{opacity:1}
 
-/* PANELS */
 #panels{overflow:hidden;transition:height 0.3s cubic-bezier(0.4,0,0.2,1)}
 .panel{display:none;padding:16px 20px 20px}
 .panel.active{display:block}
 
-/* RECORD PANEL */
 #rec-btn{width:100%;padding:14px;border-radius:var(--radius);
-  font-family:var(--mono);font-size:14px;font-weight:500;cursor:pointer;
+  font-family:var(--font);font-size:14px;font-weight:600;cursor:pointer;
   display:flex;align-items:center;justify-content:center;gap:10px;
-  transition:all 0.2s;letter-spacing:0.03em;border:none}
+  transition:all 0.2s;border:none}
 #rec-btn.idle{background:var(--green3);color:var(--green2)}
 #rec-btn.idle:hover{background:#3a9a58}
-#rec-btn.recording{background:rgba(224,82,82,0.2);color:var(--red);
-  border:0.5px solid rgba(224,82,82,0.4)}
+#rec-btn.recording{background:rgba(224,82,82,0.2);color:var(--red);border:0.5px solid rgba(224,82,82,0.4)}
 #rec-btn i{font-size:18px}
+
 #type-sel{display:flex;gap:8px;margin-bottom:12px}
 .type-opt{flex:1;padding:10px;border:0.5px solid var(--border);border-radius:var(--radius-sm);
-  cursor:pointer;text-align:center;color:var(--text3);transition:all 0.2s;font-family:var(--mono);
-  font-size:12px}
+  cursor:pointer;text-align:center;color:var(--text3);transition:all 0.2s;font-family:var(--font);font-size:12px}
 .type-opt i{display:block;font-size:20px;margin-bottom:4px}
 .type-opt.selected{border-color:var(--green);color:var(--green2);background:rgba(76,175,110,0.08)}
 
-/* IMPORT PANEL */
 #import-zone{border:1px dashed var(--border2);border-radius:var(--radius);
-  padding:24px 16px;text-align:center;cursor:pointer;transition:all 0.2s;
-  color:var(--text3)}
+  padding:24px 16px;text-align:center;cursor:pointer;transition:all 0.2s;color:var(--text3)}
 #import-zone:hover{border-color:var(--green);color:var(--green2);background:rgba(76,175,110,0.04)}
 #import-zone i{font-size:32px;display:block;margin-bottom:8px}
 #file-input{display:none}
 #imported-track{display:none;margin-top:12px;padding:12px 14px;
-  background:var(--bg3);border-radius:var(--radius-sm);
-  border:0.5px solid var(--border)}
-#imported-name{font-weight:500;color:var(--green2);font-size:13px;margin-bottom:4px}
+  background:var(--bg3);border-radius:var(--radius-sm);border:0.5px solid var(--border)}
+#imported-name{font-weight:600;color:var(--green2);font-size:13px;margin-bottom:4px}
 #imported-meta{color:var(--text3);font-size:11px}
 #clear-import{float:right;background:none;border:none;color:var(--text3);cursor:pointer;font-size:16px;padding:0}
 #clear-import:hover{color:var(--red)}
 
-/* HISTORY PANEL */
 #history-list{max-height:220px;overflow-y:auto}
 .hist-item{display:flex;align-items:center;gap:12px;padding:10px 0;
   border-bottom:0.5px solid var(--border);cursor:pointer;transition:opacity 0.15s}
@@ -132,7 +115,7 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
   background:var(--bg3);display:flex;align-items:center;justify-content:center;
   color:var(--green2);font-size:18px;flex-shrink:0}
 .hist-info{flex:1;min-width:0}
-.hist-name{font-weight:500;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hist-name{font-weight:600;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .hist-meta{font-size:11px;color:var(--text3);margin-top:2px}
 .hist-actions{display:flex;gap:4px}
 .hist-action{background:none;border:none;color:var(--text3);cursor:pointer;padding:6px;font-size:16px;
@@ -142,44 +125,50 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
 #no-history{text-align:center;padding:24px;color:var(--text3);font-size:13px}
 #no-history i{font-size:28px;display:block;margin-bottom:8px}
 
-/* DRIVE PANEL */
-#drive-panel .info-row{display:flex;align-items:center;gap:10px;
-  padding:10px 0;border-bottom:0.5px solid var(--border);font-size:13px}
-#drive-panel .info-row:last-child{border-bottom:none}
-#drive-panel .info-row i{color:var(--green2);font-size:18px;width:20px;text-align:center}
-#drive-panel .info-row span{color:var(--text2)}
-#drive-status{margin-bottom:12px;padding:10px 12px;border-radius:var(--radius-sm);
+#drive-status{margin-bottom:10px;padding:10px 12px;border-radius:var(--radius-sm);
   background:var(--bg3);font-size:12px;color:var(--text3)}
 #drive-status.connected{color:var(--green2);background:rgba(76,175,110,0.08)}
+.drive-btn{width:100%;padding:10px;margin-bottom:8px;border-radius:var(--radius-sm);
+  background:rgba(76,175,110,0.1);border:0.5px solid var(--border2);color:var(--green2);
+  font-family:var(--font);font-size:12px;cursor:pointer}
+.drive-btn:hover{background:rgba(76,175,110,0.18)}
+.info-row{display:flex;align-items:center;gap:10px;padding:8px 0;
+  border-bottom:0.5px solid var(--border);font-size:13px}
+.info-row:last-child{border-bottom:none}
+.info-row i{color:var(--green2);font-size:18px;width:20px;text-align:center}
+.info-row span{color:var(--text2)}
 
-/* PULSE dot */
-.pulse-dot{position:relative;width:16px;height:16px}
-.pulse-dot::before{content:'';position:absolute;inset:0;border-radius:50%;
-  background:var(--green);animation:pulse 1.5s ease-out infinite}
-.pulse-dot::after{content:'';position:absolute;inset:3px;border-radius:50%;background:var(--green2)}
-@keyframes pulse{0%{transform:scale(1);opacity:0.8}100%{transform:scale(2.5);opacity:0}}
+/* KM MILESTONE MARKER */
+.km-marker{background:rgba(15,26,18,0.9);border:1.5px solid var(--amber);
+  border-radius:50%;width:24px;height:24px;display:flex;align-items:center;justify-content:center;
+  font-family:var(--font);font-size:9px;font-weight:700;color:var(--amber);cursor:pointer}
 
-/* GPS MARKER */
+::-webkit-scrollbar{width:4px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+
+@keyframes recblink{0%,100%{opacity:1}50%{opacity:0.3}}
+.rec-dot{display:inline-block;width:8px;height:8px;border-radius:50%;
+  background:var(--red);animation:recblink 1s infinite;margin-right:4px}
+
 .gps-marker{width:18px;height:18px;border-radius:50%;background:var(--green2);
   border:3px solid #fff;box-shadow:0 0 0 3px rgba(76,175,110,0.4)}
-.gps-arrow{width:0;height:0;filter:drop-shadow(0 1px 2px rgba(0,0,0,0.5))}
 
-/* TOAST */
 #toast{position:fixed;bottom:120px;left:50%;transform:translateX(-50%);
   z-index:300;background:var(--bg3);border:0.5px solid var(--border2);
   border-radius:20px;padding:10px 20px;font-size:12px;color:var(--text2);
   opacity:0;transition:opacity 0.3s;pointer-events:none;white-space:nowrap}
 #toast.show{opacity:1}
 
-/* scrollbar */
-::-webkit-scrollbar{width:4px}
-::-webkit-scrollbar-track{background:transparent}
-::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
-
-/* Recording blink */
-@keyframes recblink{0%,100%{opacity:1}50%{opacity:0.3}}
-.rec-dot{display:inline-block;width:8px;height:8px;border-radius:50%;
-  background:var(--red);animation:recblink 1s infinite;margin-right:4px}
+/* VERSION MODAL */
+#ver-modal{position:fixed;inset:0;z-index:600;background:rgba(10,20,12,0.97);
+  display:flex;align-items:center;justify-content:center;padding:20px}
+#ver-modal .box{background:var(--bg3);border:0.5px solid var(--border2);
+  border-radius:var(--radius);padding:20px;width:100%;max-width:400px}
+#ver-modal input,#ver-modal textarea{width:100%;background:var(--bg);border:0.5px solid var(--border2);
+  border-radius:var(--radius-sm);padding:10px;color:var(--text);font-family:var(--font);
+  font-size:13px;margin-bottom:10px}
+#ver-modal textarea{height:100px;resize:none}
 </style>
 </head>
 <body>
@@ -224,28 +213,23 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
   <div id="bottom-inner">
     <div id="tabs">
       <div class="tab active" onclick="switchTab('rec')">
-        <i class="ti ti-circle-dot"></i>
-        <span>Registar</span>
+        <i class="ti ti-circle-dot"></i><span>Registar</span>
         <div class="tab-indicator"></div>
       </div>
       <div class="tab" onclick="switchTab('import')">
-        <i class="ti ti-file-import"></i>
-        <span>Importar</span>
+        <i class="ti ti-file-import"></i><span>Importar</span>
         <div class="tab-indicator"></div>
       </div>
       <div class="tab" onclick="switchTab('hist')">
-        <i class="ti ti-route"></i>
-        <span>Percursos</span>
+        <i class="ti ti-route"></i><span>Percursos</span>
         <div class="tab-indicator"></div>
       </div>
       <div class="tab" onclick="switchTab('drive')">
-        <i class="ti ti-cloud"></i>
-        <span>Drive</span>
+        <i class="ti ti-cloud"></i><span>Drive</span>
         <div class="tab-indicator"></div>
       </div>
     </div>
     <div id="panels">
-      <!-- RECORD -->
       <div class="panel active" id="panel-rec">
         <div id="type-sel">
           <div class="type-opt selected" id="type-walk" onclick="selectType('walk')">
@@ -260,11 +244,10 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
           <span id="rec-label">Iniciar registo</span>
         </button>
       </div>
-      <!-- IMPORT -->
       <div class="panel" id="panel-import">
         <div id="import-zone" onclick="document.getElementById('file-input').click()">
           <i class="ti ti-file-type-gpx"></i>
-          <div style="font-size:13px;font-weight:500;margin-bottom:4px">Importar trilho GPX</div>
+          <div style="font-size:13px;font-weight:600;margin-bottom:4px">Importar trilho GPX</div>
           <div style="font-size:11px">Wikiloc · AllTrails · Garmin · Komoot</div>
         </div>
         <input type="file" id="file-input" accept=".gpx,.kml" onchange="loadGPXFile(event)">
@@ -276,38 +259,31 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
           <div id="imported-meta"></div>
           <button style="width:100%;margin-top:10px;padding:10px;border-radius:var(--radius-sm);
             background:rgba(76,175,110,0.1);border:0.5px solid var(--border2);color:var(--green2);
-            font-family:var(--mono);font-size:12px;cursor:pointer" onclick="centerOnImport()">
+            font-family:var(--font);font-size:12px;cursor:pointer" onclick="centerOnImport()">
             <i class="ti ti-crosshair"></i> Centrar no mapa
           </button>
         </div>
       </div>
-      <!-- HISTORY -->
       <div class="panel" id="panel-hist">
         <div id="history-list"></div>
       </div>
-      <!-- DRIVE -->
       <div class="panel" id="panel-drive">
         <div id="drive-status">Não ligado ao Google Drive</div>
-        <button onclick="loadHistoryFromDrive()" style="width:100%;padding:10px;margin-bottom:10px;
-          border-radius:var(--radius-sm);background:rgba(76,175,110,0.1);
-          border:0.5px solid var(--border2);color:var(--green2);
-          font-family:var(--mono);font-size:12px;cursor:pointer">
+        <button class="drive-btn" onclick="loadHistoryFromDrive()">
           <i class="ti ti-refresh"></i> Sincronizar do Drive
         </button>
-        <div class="info-row" style="display:flex;align-items:flex-start;gap:10px;padding:8px 0;font-size:12px;color:var(--text3);border-bottom:0.5px solid var(--border)">
-          <i class="ti ti-info-circle" style="color:var(--amber);font-size:16px;margin-top:1px"></i>
-          <span>Para activar o Google Drive, configura o Client ID no Google Cloud Console com a API do Drive activada. Substitui <code style="color:var(--amber)">YOUR_CLIENT_ID</code> no código da app.</span>
-        </div>
-        <div style="margin-top:12px">
+        <button class="drive-btn" onclick="showPublishModal()">
+          <i class="ti ti-tag"></i> Publicar versão no Drive
+        </button>
+        <div style="margin-top:8px">
           <div style="font-size:11px;color:var(--text3);margin-bottom:8px;letter-spacing:0.04em">FUNCIONALIDADES DRIVE</div>
-          <div id="drive-panel">
-            <div class="info-row"><i class="ti ti-upload"></i><span>Sincronização automática de percursos</span></div>
-            <div class="info-row"><i class="ti ti-folder"></i><span>Pasta <em>Trilhos GPS/</em> no teu Drive</span></div>
-            <div class="info-row"><i class="ti ti-file-type-gpx"></i><span>Ficheiros GPX individuais por percurso</span></div>
-            <div class="info-row"><i class="ti ti-world"></i><span>Acesso de qualquer dispositivo</span></div>
-            <div class="info-row"><i class="ti ti-brand-google"></i><span>Compatível com Google Earth (KML)</span></div>
-          </div>
+          <div class="info-row"><i class="ti ti-upload"></i><span>Sincronização automática de percursos</span></div>
+          <div class="info-row"><i class="ti ti-folder"></i><span>Pasta <em>Trilhos GPS/</em> no teu Drive</span></div>
+          <div class="info-row"><i class="ti ti-file-type-gpx"></i><span>Ficheiros GPX individuais por percurso</span></div>
+          <div class="info-row"><i class="ti ti-tag"></i><span>Versões arquivadas em <em>Trilhos GPS/Versões/</em></span></div>
+          <div class="info-row"><i class="ti ti-brand-google"></i><span>Compatível com Google Earth (KML)</span></div>
         </div>
+        <div style="margin-top:12px;text-align:right;font-size:11px;color:var(--text3)">versão r2026.01</div>
       </div>
     </div>
   </div>
@@ -318,14 +294,18 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
 <script>
 const GOOGLE_CLIENT_ID = '271389330523-4jg4e39cgf31v7mecjabj4hji6pjug1k.apps.googleusercontent.com';
 const DRIVE_SCOPE = 'https://www.googleapis.com/auth/drive.file';
-const OFF_TRACK_THRESHOLD = 50; // metros
+const OFF_TRACK_THRESHOLD = 50;
+const APP_VERSION = 'r2026.01';
 
-let map, gpsMarker, recordedPolyline, importedPolyline;
+let map, recordedPolyline, importedPolyline;
 let tracking = false, activityType = 'walk';
 let watchId = null, timerInterval = null;
 let recordedPoints = [], startTime = null, totalDistance = 0;
+let elevGain = 0, elevLoss = 0, elevMin = null, elevMax = null, lastAlt = null;
+let kmMilestones = [], lastKmMarkers = [];
+let nextKm = 1, kmStartTime = null;
 let importedTrack = null;
-let googleUser = null, driveToken = null;
+let driveToken = null;
 let history = [];
 let currentTab = 'rec';
 
@@ -333,11 +313,8 @@ let currentTab = 'rec';
 function init() {
   map = L.map('map', {zoomControl:false, attributionControl:false}).setView([41.15, -8.61], 13);
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {maxZoom:19}).addTo(map);
-
-  gpsMarker = L.divIcon({className:'gps-marker',iconSize:[18,18],iconAnchor:[9,9]});
   recordedPolyline = L.polyline([],{color:'#4caf6e',weight:4,opacity:0.9}).addTo(map);
   importedPolyline = L.polyline([],{color:'#e8b84b',weight:3,opacity:0.85,dashArray:'8,4'}).addTo(map);
-
   loadHistory();
   renderHistory();
   adjustPanelHeight();
@@ -358,8 +335,7 @@ function switchTab(tab) {
   document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
   document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
   const tabs = ['rec','import','hist','drive'];
-  const idx = tabs.indexOf(tab);
-  document.querySelectorAll('.tab')[idx].classList.add('active');
+  document.querySelectorAll('.tab')[tabs.indexOf(tab)].classList.add('active');
   document.getElementById('panel-'+tab).classList.add('active');
   adjustPanelHeight();
   if (tab === 'hist') renderHistory();
@@ -368,10 +344,7 @@ function switchTab(tab) {
 function adjustPanelHeight() {
   setTimeout(() => {
     const panel = document.querySelector('.panel.active');
-    if (panel) {
-      const h = panel.scrollHeight;
-      document.getElementById('panels').style.height = Math.min(h, 260) + 'px';
-    }
+    if (panel) document.getElementById('panels').style.height = Math.min(panel.scrollHeight, 260)+'px';
   }, 50);
 }
 
@@ -392,6 +365,10 @@ function startRecording() {
   tracking = true;
   recordedPoints = [];
   totalDistance = 0;
+  elevGain = 0; elevLoss = 0; elevMin = null; elevMax = null; lastAlt = null;
+  kmMilestones = []; nextKm = 1; kmStartTime = null;
+  lastKmMarkers.forEach(m => map.removeLayer(m));
+  lastKmMarkers = [];
   startTime = Date.now();
   recordedPolyline.setLatLngs([]);
   document.getElementById('rec-btn').className = 'recording';
@@ -422,21 +399,62 @@ function onGPS(pos) {
   setGPSMarker(lat, lng);
   map.setView([lat, lng]);
   if (!tracking) return;
+
   const pt = {lat, lng, alt: altitude||null, ts: Date.now()};
+
   if (recordedPoints.length > 0) {
     const prev = recordedPoints[recordedPoints.length-1];
     totalDistance += haversine(prev.lat, prev.lng, lat, lng);
+  } else {
+    kmStartTime = Date.now();
   }
+
+  // elevation
+  if (altitude != null) {
+    if (elevMin === null || altitude < elevMin) elevMin = altitude;
+    if (elevMax === null || altitude > elevMax) elevMax = altitude;
+    if (lastAlt !== null) {
+      const diff = altitude - lastAlt;
+      if (diff > 0.5) elevGain += diff;
+      else if (diff < -0.5) elevLoss += Math.abs(diff);
+    }
+    lastAlt = altitude;
+  }
+
   recordedPoints.push(pt);
   recordedPolyline.addLatLng([lat, lng]);
+
+  // km milestones
+  const kmDone = Math.floor(totalDistance / 1000);
+  while (nextKm <= kmDone) {
+    const elapsed = (Date.now() - (kmMilestones.length > 0 ? kmMilestones[kmMilestones.length-1].ts : startTime)) / 1000;
+    const kmSpeed = elapsed > 0 ? (3600 / elapsed).toFixed(1) : '—';
+    const ms = {km: nextKm, lat, lng, ts: Date.now(), speed: kmSpeed, elapsed: Math.round(elapsed)};
+    kmMilestones.push(ms);
+    addKmMarker(ms, true);
+    kmStartTime = Date.now();
+    nextKm++;
+  }
+
   document.getElementById('st-dist').textContent = (totalDistance/1000).toFixed(2);
-  const spd = speed != null ? (speed * 3.6).toFixed(1) : '—';
-  document.getElementById('st-spd').textContent = spd;
+  document.getElementById('st-spd').textContent = speed != null ? (speed*3.6).toFixed(1) : '—';
   if (altitude != null) document.getElementById('st-elev').textContent = Math.round(altitude);
   checkOffTrack(lat, lng);
 }
 
-function onGPSErr(e) { if (tracking) toast('Sinal GPS fraco'); }
+function addKmMarker(ms, live) {
+  const icon = L.divIcon({
+    className: '',
+    html: `<div class="km-marker" title="Km ${ms.km}: ${ms.speed} km/h">${ms.km}</div>`,
+    iconSize: [24,24], iconAnchor: [12,12]
+  });
+  const marker = L.marker([ms.lat, ms.lng], {icon}).addTo(map);
+  marker.bindPopup(`<b>Km ${ms.km}</b><br>${ms.speed} km/h<br>${formatDur(ms.elapsed)}`, {className:'km-popup'});
+  if (live) lastKmMarkers.push(marker);
+  return marker;
+}
+
+function onGPSErr() { if (tracking) toast('Sinal GPS fraco'); }
 
 function setGPSMarker(lat, lng) {
   if (!map._gpsM) {
@@ -444,23 +462,19 @@ function setGPSMarker(lat, lng) {
       icon: L.divIcon({className:'gps-marker',iconSize:[18,18],iconAnchor:[9,9]}),
       zIndexOffset:1000
     }).addTo(map);
-  } else {
-    map._gpsM.setLatLng([lat, lng]);
-  }
+  } else { map._gpsM.setLatLng([lat,lng]); }
 }
 
 function updateTimer() {
-  const elapsed = Math.floor((Date.now() - startTime)/1000);
+  const elapsed = Math.floor((Date.now()-startTime)/1000);
   const m = String(Math.floor(elapsed/60)).padStart(2,'0');
   const s = String(elapsed%60).padStart(2,'0');
   document.getElementById('st-time').textContent = m+':'+s;
 }
 
 function checkOffTrack(lat, lng) {
-  if (!importedTrack || importedTrack.length === 0) return;
-  const minDist = importedTrack.reduce((min, pt) => {
-    return Math.min(min, haversine(lat, lng, pt.lat, pt.lng));
-  }, Infinity);
+  if (!importedTrack || !importedTrack.length) return;
+  const minDist = importedTrack.reduce((min,pt) => Math.min(min,haversine(lat,lng,pt.lat,pt.lng)), Infinity);
   document.getElementById('offtrack').classList.toggle('show', minDist > OFF_TRACK_THRESHOLD);
 }
 
@@ -478,14 +492,13 @@ function parseGPX(text, name) {
   const parser = new DOMParser();
   const doc = parser.parseFromString(text, 'application/xml');
   const trkpts = doc.querySelectorAll('trkpt, rtept, wpt');
-  if (trkpts.length === 0) { toast('Ficheiro GPX inválido'); return; }
+  if (!trkpts.length) { toast('Ficheiro GPX inválido'); return; }
   importedTrack = Array.from(trkpts).map(pt => ({
     lat: parseFloat(pt.getAttribute('lat')),
     lng: parseFloat(pt.getAttribute('lon')),
     ele: pt.querySelector('ele') ? parseFloat(pt.querySelector('ele').textContent) : null
   }));
-  const latlngs = importedTrack.map(p => [p.lat, p.lng]);
-  importedPolyline.setLatLngs(latlngs);
+  importedPolyline.setLatLngs(importedTrack.map(p => [p.lat, p.lng]));
   map.fitBounds(importedPolyline.getBounds(), {padding:[40,40]});
   const distKm = calcTrackDistance(importedTrack);
   const cleanName = name.replace(/\.(gpx|kml)$/i,'');
@@ -506,8 +519,7 @@ function clearImport() {
 }
 
 function centerOnImport() {
-  if (importedPolyline.getLatLngs().length > 0)
-    map.fitBounds(importedPolyline.getBounds(), {padding:[40,40]});
+  if (importedPolyline.getLatLngs().length) map.fitBounds(importedPolyline.getBounds(), {padding:[40,40]});
 }
 
 // ---- SAVE / HISTORY ----
@@ -520,6 +532,11 @@ function saveTrack() {
     date: new Date().toISOString(),
     distance: totalDistance,
     duration: Math.floor((Date.now()-startTime)/1000),
+    elevGain: Math.round(elevGain||0),
+    elevLoss: Math.round(elevLoss||0),
+    elevMin: elevMin ? Math.round(elevMin) : null,
+    elevMax: elevMax ? Math.round(elevMax) : null,
+    kmMilestones,
     points: recordedPoints
   };
   history.unshift(track);
@@ -539,7 +556,7 @@ function saveHistory() {
 
 function renderHistory() {
   const el = document.getElementById('history-list');
-  if (history.length === 0) {
+  if (!history.length) {
     el.innerHTML = '<div id="no-history"><i class="ti ti-route-off"></i>Ainda sem percursos registados</div>';
     return;
   }
@@ -560,9 +577,120 @@ function renderHistory() {
 function showTrack(id) {
   const t = history.find(x => x.id === id);
   if (!t || t.points.length < 2) return;
+  lastKmMarkers.forEach(m => map.removeLayer(m));
+  lastKmMarkers = [];
   recordedPolyline.setLatLngs(t.points.map(p => [p.lat, p.lng]));
+  if (t.kmMilestones && t.kmMilestones.length) {
+    t.kmMilestones.forEach(ms => lastKmMarkers.push(addKmMarker(ms, false)));
+  }
   map.fitBounds(recordedPolyline.getBounds(), {padding:[40,40]});
-  switchTab('rec');
+  showDetailModal(t);
+}
+
+function showDetailModal(t) {
+  const hasElev = t.points && t.points.some(p => p.alt != null);
+  const hasKm = t.kmMilestones && t.kmMilestones.length > 0;
+  const speedAvg = t.duration > 0 ? ((t.distance/1000)/(t.duration/3600)).toFixed(1) : '—';
+  const eG = t.elevGain != null ? t.elevGain+'m' : '—';
+  const eL = t.elevLoss != null ? t.elevLoss+'m' : '—';
+  const eMax = t.elevMax != null ? t.elevMax+'m' : '—';
+
+  const modal = document.createElement('div');
+  modal.id = 'detail-modal';
+  modal.style.cssText = 'position:fixed;inset:0;z-index:500;background:rgba(10,20,12,0.96);overflow-y:auto;padding:20px';
+
+  let kmTable = '';
+  if (hasKm) {
+    kmTable = `<div style="margin-bottom:16px">
+      <div style="font-size:11px;color:var(--text3);letter-spacing:0.05em;margin-bottom:8px">VELOCIDADE POR KM</div>
+      <table style="width:100%;border-collapse:collapse;font-size:12px">
+        <thead><tr style="color:var(--text3)">
+          <th style="text-align:left;padding:4px 0;font-weight:500">Km</th>
+          <th style="text-align:right;padding:4px 0;font-weight:500">Vel.</th>
+          <th style="text-align:right;padding:4px 0;font-weight:500">Tempo</th>
+        </tr></thead>
+        <tbody>${t.kmMilestones.map(ms => `
+          <tr style="border-top:0.5px solid var(--border)">
+            <td style="padding:6px 0;color:var(--amber);font-weight:600">${ms.km} km</td>
+            <td style="text-align:right;padding:6px 0;color:var(--green2)">${ms.speed} km/h</td>
+            <td style="text-align:right;padding:6px 0;color:var(--text3)">${formatDur(ms.elapsed)}</td>
+          </tr>`).join('')}
+        </tbody>
+      </table>
+    </div>`;
+  }
+
+  modal.innerHTML = `
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px">
+      <button onclick="document.getElementById('detail-modal').remove();lastKmMarkers.forEach(m=>map.removeLayer(m));lastKmMarkers=[]"
+        style="background:var(--bg3);border:0.5px solid var(--border2);color:var(--text2);border-radius:8px;padding:8px 12px;cursor:pointer;font-family:var(--font)">
+        <i class="ti ti-arrow-left"></i>
+      </button>
+      <div>
+        <div style="font-size:17px;font-weight:600;color:var(--text)">${t.name}</div>
+        <div style="font-size:12px;color:var(--text3)">${formatDate(new Date(t.date))} · <i class="ti ti-${t.type==='bike'?'bike':'walk'}" style="font-size:12px"></i> ${t.type==='bike'?'Bicicleta':'Caminhada'}</div>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px">
+      ${statCard('ti-route','Distância',(t.distance/1000).toFixed(2)+' km')}
+      ${statCard('ti-clock','Duração',formatDur(t.duration))}
+      ${statCard('ti-gauge','Vel. média',speedAvg+' km/h')}
+      ${statCard('ti-mountain','Alt. máx',eMax)}
+      ${statCard('ti-trending-up','Subida',eG)}
+      ${statCard('ti-trending-down','Descida',eL)}
+    </div>
+    ${hasElev ? `<div style="margin-bottom:16px">
+      <div style="font-size:11px;color:var(--text3);letter-spacing:0.05em;margin-bottom:8px">PERFIL DE ELEVAÇÃO</div>
+      <canvas id="elev-chart" style="width:100%;height:120px;display:block"></canvas>
+    </div>` : ''}
+    ${kmTable}
+    <div style="display:flex;gap:8px">
+      <button onclick="exportGPX('${t.id}')" style="flex:1;padding:11px;border-radius:var(--radius-sm);background:rgba(76,175,110,0.1);border:0.5px solid var(--border2);color:var(--green2);font-family:var(--font);font-size:12px;cursor:pointer">
+        <i class="ti ti-download"></i> Exportar GPX
+      </button>
+      <button onclick="deleteTrack('${t.id}');document.getElementById('detail-modal').remove()" style="padding:11px 14px;border-radius:var(--radius-sm);background:rgba(224,82,82,0.1);border:0.5px solid rgba(224,82,82,0.3);color:var(--red);font-family:var(--font);font-size:12px;cursor:pointer">
+        <i class="ti ti-trash"></i>
+      </button>
+    </div>`;
+
+  document.body.appendChild(modal);
+  if (hasElev) setTimeout(() => drawElevChart(t.points), 100);
+}
+
+function statCard(icon, label, value) {
+  return `<div style="background:var(--bg3);border:0.5px solid var(--border);border-radius:var(--radius-sm);padding:12px">
+    <div style="font-size:11px;color:var(--text3);margin-bottom:4px"><i class="ti ${icon}" style="font-size:13px"></i> ${label}</div>
+    <div style="font-size:18px;font-weight:600;color:var(--green2)">${value}</div>
+  </div>`;
+}
+
+function drawElevChart(points) {
+  const canvas = document.getElementById('elev-chart');
+  if (!canvas) return;
+  const pts = points.filter(p => p.alt != null);
+  if (pts.length < 2) return;
+  canvas.width = canvas.offsetWidth * window.devicePixelRatio;
+  canvas.height = 120 * window.devicePixelRatio;
+  const ctx = canvas.getContext('2d');
+  ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+  const W = canvas.offsetWidth, H = 120;
+  const alts = pts.map(p => p.alt);
+  const minA = Math.min(...alts), maxA = Math.max(...alts);
+  const range = maxA - minA || 1;
+  const pad = 24;
+  const toX = i => pad + (i/(pts.length-1))*(W-pad*2);
+  const toY = a => H - pad - ((a-minA)/range)*(H-pad*2);
+  ctx.beginPath();
+  ctx.moveTo(toX(0), toY(pts[0].alt));
+  pts.forEach((p,i) => { if(i>0) ctx.lineTo(toX(i), toY(p.alt)); });
+  ctx.strokeStyle = '#4caf6e'; ctx.lineWidth = 2; ctx.stroke();
+  ctx.lineTo(toX(pts.length-1), H-pad);
+  ctx.lineTo(toX(0), H-pad);
+  ctx.closePath();
+  ctx.fillStyle = 'rgba(76,175,110,0.15)'; ctx.fill();
+  ctx.fillStyle = '#7a9882'; ctx.font = '10px Nunito';
+  ctx.fillText(Math.round(minA)+'m', 2, H-pad+4);
+  ctx.fillText(Math.round(maxA)+'m', 2, pad+4);
 }
 
 function deleteTrack(id) {
@@ -576,8 +704,7 @@ function deleteTrack(id) {
 function exportGPX(id) {
   const t = history.find(x => x.id === id);
   if (!t) return;
-  const gpx = buildGPX(t);
-  const blob = new Blob([gpx], {type:'application/gpx+xml'});
+  const blob = new Blob([buildGPX(t)], {type:'application/gpx+xml'});
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
   a.download = t.name.replace(/\s+/g,'_')+'.gpx';
@@ -589,26 +716,16 @@ function buildGPX(track) {
     `    <trkpt lat="${p.lat.toFixed(7)}" lon="${p.lng.toFixed(7)}">${p.alt!=null?`<ele>${p.alt.toFixed(1)}</ele>`:''}${p.ts?`<time>${new Date(p.ts).toISOString()}</time>`:''}</trkpt>`
   ).join('\n');
   return `<?xml version="1.0" encoding="UTF-8"?>
-<gpx version="1.1" creator="Trilhos App"
-  xmlns="http://www.topografix.com/GPX/1/1">
-  <metadata>
-    <name>${track.name}</name>
-    <time>${track.date}</time>
-  </metadata>
-  <trk>
-    <name>${track.name}</name>
-    <type>${track.type}</type>
-    <trkseg>
-${pts}
-    </trkseg>
-  </trk>
+<gpx version="1.1" creator="Trilhos App ${APP_VERSION}" xmlns="http://www.topografix.com/GPX/1/1">
+  <metadata><name>${track.name}</name><time>${track.date}</time></metadata>
+  <trk><name>${track.name}</name><type>${track.type}</type><trkseg>\n${pts}\n  </trkseg></trk>
 </gpx>`;
 }
 
 // ---- GOOGLE AUTH ----
 function handleAuth() {
   if (driveToken) { signOut(); return; }
-  if (GOOGLE_CLIENT_ID === '271389330523-4jg4e39cgf31v7mecjabj4hji6pjug1k.apps.googleusercontent.com') {
+  if (GOOGLE_CLIENT_ID === 'YOUR_CLIENT_ID') {
     alert('Configura o Google Client ID no código da app.\n\nPassos:\n1. Google Cloud Console\n2. Criar projecto\n3. Activar Drive API\n4. Criar OAuth 2.0 Client ID (tipo: Web)\n5. Substituir YOUR_CLIENT_ID no código');
     return;
   }
@@ -643,7 +760,7 @@ function checkOAuthCallback() {
     history.replaceState(null,'',location.pathname);
     setDriveConnected();
     toast('Google Drive ligado');
-    setTimeout(() => loadHistoryFromDrive(), 1000);
+    setTimeout(async () => { await migrateLocalToDrive(); await loadHistoryFromDrive(); }, 1000);
   }
 }
 
@@ -659,20 +776,14 @@ async function syncToDrive(track) {
   if (!driveToken) return;
   try {
     const folderId = await getOrCreateFolder('Trilhos GPS');
-    const gpxContent = buildGPX(track);
-    await uploadFile(folderId, track.name.replace(/\s+/g,'_')+'_'+track.id+'.gpx', gpxContent, 'application/gpx+xml');
+    await uploadFile(folderId, track.name.replace(/\s+/g,'_')+'_'+track.id+'.gpx', buildGPX(track), 'application/gpx+xml');
     await saveHistoryToDrive(folderId);
     toast('Sincronizado com Drive');
   } catch(e) { console.error(e); toast('Erro ao sincronizar com Drive'); }
 }
 
 async function saveHistoryToDrive(folderId) {
-  const meta = history.map(t => ({
-    id: t.id, name: t.name, type: t.type,
-    date: t.date, distance: t.distance, duration: t.duration,
-    points: t.points
-  }));
-  const content = JSON.stringify(meta);
+  const content = JSON.stringify(history);
   const existing = await driveAPI(`files?q=name='trilhos_history.json' and '${folderId}' in parents and trashed=false&fields=files(id)`);
   if (existing.files && existing.files.length > 0) {
     await fetch(`https://www.googleapis.com/upload/drive/v3/files/${existing.files[0].id}?uploadType=media`, {
@@ -686,12 +797,12 @@ async function saveHistoryToDrive(folderId) {
 }
 
 async function loadHistoryFromDrive() {
-  if (!driveToken) return;
+  if (!driveToken) { toast('Liga o Drive primeiro'); return; }
   try {
-    toast('A carregar percursos do Drive...');
+    toast('A carregar do Drive...');
     const folderId = await getOrCreateFolder('Trilhos GPS');
     const res = await driveAPI(`files?q=name='trilhos_history.json' and '${folderId}' in parents and trashed=false&fields=files(id)`);
-    if (!res.files || res.files.length === 0) { toast('Sem percursos no Drive'); return; }
+    if (!res.files || !res.files.length) { toast('Sem percursos no Drive'); return; }
     const fileRes = await fetch(`https://www.googleapis.com/drive/v3/files/${res.files[0].id}?alt=media`, {
       headers:{Authorization:`Bearer ${driveToken}`}
     });
@@ -703,15 +814,93 @@ async function loadHistoryFromDrive() {
       history.sort((a,b) => new Date(b.date)-new Date(a.date));
       saveHistory();
       renderHistory();
-      toast(added > 0 ? `${added} percurso(s) carregado(s) do Drive` : 'Historico ja actualizado');
+      toast(added > 0 ? `${added} percurso(s) carregado(s)` : 'Historico ja actualizado');
     }
   } catch(e) { console.error(e); toast('Erro ao carregar do Drive'); }
 }
 
-async function getOrCreateFolder(name) {
-  const res = await driveAPI(`files?q=name='${name}' and mimeType='application/vnd.google-apps.folder' and trashed=false&fields=files(id)`);
+async function migrateLocalToDrive() {
+  if (!driveToken || !history.length) return;
+  try {
+    const folderId = await getOrCreateFolder('Trilhos GPS');
+    const res = await driveAPI(`files?q=name='trilhos_history.json' and '${folderId}' in parents and trashed=false&fields=files(id)`);
+    if (res.files && res.files.length > 0) return;
+    for (const t of history) {
+      await uploadFile(folderId, t.name.replace(/\s+/g,'_')+'_'+t.id+'.gpx', buildGPX(t), 'application/gpx+xml');
+    }
+    await saveHistoryToDrive(folderId);
+    toast('Historico migrado para o Drive');
+  } catch(e) { console.error('Migracao falhou:', e); }
+}
+
+// ---- PUBLISH VERSION ----
+function showPublishModal() {
+  if (!driveToken) { toast('Liga o Drive primeiro'); return; }
+  const modal = document.createElement('div');
+  modal.id = 'ver-modal';
+  modal.innerHTML = `
+    <div class="box">
+      <div style="font-size:16px;font-weight:600;margin-bottom:16px;color:var(--green2)">
+        <i class="ti ti-tag"></i> Publicar versão
+      </div>
+      <input id="ver-num" placeholder="Número (ex: r2026.01)" value="${APP_VERSION}">
+      <textarea id="ver-notes" placeholder="Notas de alteração..."></textarea>
+      <div style="display:flex;gap:8px">
+        <button onclick="document.getElementById('ver-modal').remove()"
+          style="flex:1;padding:10px;border-radius:var(--radius-sm);background:var(--bg);
+          border:0.5px solid var(--border2);color:var(--text3);font-family:var(--font);cursor:pointer">
+          Cancelar
+        </button>
+        <button onclick="publishVersion()"
+          style="flex:2;padding:10px;border-radius:var(--radius-sm);background:var(--green3);
+          border:none;color:var(--green2);font-family:var(--font);font-weight:600;cursor:pointer">
+          <i class="ti ti-upload"></i> Publicar
+        </button>
+      </div>
+    </div>`;
+  document.body.appendChild(modal);
+}
+
+async function publishVersion() {
+  const ver = document.getElementById('ver-num').value.trim();
+  const notes = document.getElementById('ver-notes').value.trim();
+  if (!ver) { toast('Indica o número de versão'); return; }
+  document.getElementById('ver-modal').remove();
+  toast('A publicar versão...');
+  try {
+    const folderId = await getOrCreateFolder('Trilhos GPS');
+    const verFolderId = await getOrCreateFolder('Versões', folderId);
+    // archive HTML
+    const htmlContent = document.documentElement.outerHTML;
+    await uploadFile(verFolderId, `trilhos_${ver}.html`, htmlContent, 'text/html');
+    // update changelog
+    const date = new Date().toLocaleDateString('pt-PT');
+    const entry = `\n## ${ver} — ${date}\n${notes || '(sem notas)'}\n`;
+    const clRes = await driveAPI(`files?q=name='trilhos_changelog.md' and '${folderId}' in parents and trashed=false&fields=files(id)`);
+    if (clRes.files && clRes.files.length > 0) {
+      const existing = await fetch(`https://www.googleapis.com/drive/v3/files/${clRes.files[0].id}?alt=media`, {
+        headers:{Authorization:`Bearer ${driveToken}`}
+      });
+      const prev = await existing.text();
+      await fetch(`https://www.googleapis.com/upload/drive/v3/files/${clRes.files[0].id}?uploadType=media`, {
+        method:'PATCH',
+        headers:{Authorization:`Bearer ${driveToken}`,'Content-Type':'text/markdown'},
+        body: prev + entry
+      });
+    } else {
+      await uploadFile(folderId, 'trilhos_changelog.md', `# Trilhos — Changelog\n${entry}`, 'text/markdown');
+    }
+    toast(`Versão ${ver} publicada`);
+  } catch(e) { console.error(e); toast('Erro ao publicar versão'); }
+}
+
+async function getOrCreateFolder(name, parentId) {
+  const parentQ = parentId ? ` and '${parentId}' in parents` : '';
+  const res = await driveAPI(`files?q=name='${name}' and mimeType='application/vnd.google-apps.folder'${parentQ} and trashed=false&fields=files(id)`);
   if (res.files && res.files.length > 0) return res.files[0].id;
-  const folder = await driveAPI('files', 'POST', {name, mimeType:'application/vnd.google-apps.folder'});
+  const body = {name, mimeType:'application/vnd.google-apps.folder'};
+  if (parentId) body.parents = [parentId];
+  const folder = await driveAPI('files', 'POST', body);
   return folder.id;
 }
 
@@ -721,8 +910,7 @@ async function uploadFile(folderId, name, content, mimeType) {
   const body = `--${boundary}\r\nContent-Type: application/json\r\n\r\n${meta}\r\n--${boundary}\r\nContent-Type: ${mimeType}\r\n\r\n${content}\r\n--${boundary}--`;
   await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', {
     method:'POST',
-    headers:{Authorization:`Bearer ${driveToken}`,
-      'Content-Type':`multipart/related; boundary=${boundary}`},
+    headers:{Authorization:`Bearer ${driveToken}`,'Content-Type':`multipart/related; boundary=${boundary}`},
     body
   });
 }
@@ -761,7 +949,7 @@ function toast(msg) {
   el.textContent = msg;
   el.classList.add('show');
   clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => el.classList.remove('show'), 2500);
+  toastTimer = setTimeout(() => el.classList.remove('show'), 2800);
 }
 
 // ---- BOOT ----
@@ -770,7 +958,7 @@ window.addEventListener('load', () => {
   if (savedToken) {
     driveToken = savedToken;
     setDriveConnected();
-    setTimeout(() => loadHistoryFromDrive(), 800);
+    setTimeout(async () => { await migrateLocalToDrive(); await loadHistoryFromDrive(); }, 800);
   }
   checkOAuthCallback();
   init();

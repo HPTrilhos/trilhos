@@ -288,6 +288,12 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
       <!-- DRIVE -->
       <div class="panel" id="panel-drive">
         <div id="drive-status">Não ligado ao Google Drive</div>
+        <button onclick="loadHistoryFromDrive()" style="width:100%;padding:10px;margin-bottom:10px;
+          border-radius:var(--radius-sm);background:rgba(76,175,110,0.1);
+          border:0.5px solid var(--border2);color:var(--green2);
+          font-family:var(--mono);font-size:12px;cursor:pointer">
+          <i class="ti ti-refresh"></i> Sincronizar do Drive
+        </button>
         <div class="info-row" style="display:flex;align-items:flex-start;gap:10px;padding:8px 0;font-size:12px;color:var(--text3);border-bottom:0.5px solid var(--border)">
           <i class="ti ti-info-circle" style="color:var(--amber);font-size:16px;margin-top:1px"></i>
           <span>Para activar o Google Drive, configura o Client ID no Google Cloud Console com a API do Drive activada. Substitui <code style="color:var(--amber)">YOUR_CLIENT_ID</code> no código da app.</span>
@@ -637,6 +643,7 @@ function checkOAuthCallback() {
     history.replaceState(null,'',location.pathname);
     setDriveConnected();
     toast('Google Drive ligado');
+    setTimeout(() => loadHistoryFromDrive(), 1000);
   }
 }
 
@@ -651,11 +658,54 @@ function setDriveConnected() {
 async function syncToDrive(track) {
   if (!driveToken) return;
   try {
-    const gpxContent = buildGPX(track);
     const folderId = await getOrCreateFolder('Trilhos GPS');
-    await uploadFile(folderId, track.name.replace(/\s+/g,'_')+'.gpx', gpxContent, 'application/gpx+xml');
+    const gpxContent = buildGPX(track);
+    await uploadFile(folderId, track.name.replace(/\s+/g,'_')+'_'+track.id+'.gpx', gpxContent, 'application/gpx+xml');
+    await saveHistoryToDrive(folderId);
     toast('Sincronizado com Drive');
-  } catch(e) { toast('Erro ao sincronizar com Drive'); }
+  } catch(e) { console.error(e); toast('Erro ao sincronizar com Drive'); }
+}
+
+async function saveHistoryToDrive(folderId) {
+  const meta = history.map(t => ({
+    id: t.id, name: t.name, type: t.type,
+    date: t.date, distance: t.distance, duration: t.duration,
+    points: t.points
+  }));
+  const content = JSON.stringify(meta);
+  const existing = await driveAPI(`files?q=name='trilhos_history.json' and '${folderId}' in parents and trashed=false&fields=files(id)`);
+  if (existing.files && existing.files.length > 0) {
+    await fetch(`https://www.googleapis.com/upload/drive/v3/files/${existing.files[0].id}?uploadType=media`, {
+      method:'PATCH',
+      headers:{Authorization:`Bearer ${driveToken}`,'Content-Type':'application/json'},
+      body: content
+    });
+  } else {
+    await uploadFile(folderId, 'trilhos_history.json', content, 'application/json');
+  }
+}
+
+async function loadHistoryFromDrive() {
+  if (!driveToken) return;
+  try {
+    toast('A carregar percursos do Drive...');
+    const folderId = await getOrCreateFolder('Trilhos GPS');
+    const res = await driveAPI(`files?q=name='trilhos_history.json' and '${folderId}' in parents and trashed=false&fields=files(id)`);
+    if (!res.files || res.files.length === 0) { toast('Sem percursos no Drive'); return; }
+    const fileRes = await fetch(`https://www.googleapis.com/drive/v3/files/${res.files[0].id}?alt=media`, {
+      headers:{Authorization:`Bearer ${driveToken}`}
+    });
+    const data = await fileRes.json();
+    if (Array.isArray(data) && data.length > 0) {
+      const localIds = new Set(history.map(t => t.id));
+      let added = 0;
+      data.forEach(t => { if (!localIds.has(t.id)) { history.push(t); added++; } });
+      history.sort((a,b) => new Date(b.date)-new Date(a.date));
+      saveHistory();
+      renderHistory();
+      toast(added > 0 ? `${added} percurso(s) carregado(s) do Drive` : 'Historico ja actualizado');
+    }
+  } catch(e) { console.error(e); toast('Erro ao carregar do Drive'); }
 }
 
 async function getOrCreateFolder(name) {
@@ -717,7 +767,11 @@ function toast(msg) {
 // ---- BOOT ----
 window.addEventListener('load', () => {
   const savedToken = sessionStorage.getItem('drive_token');
-  if (savedToken) { driveToken = savedToken; setDriveConnected(); }
+  if (savedToken) {
+    driveToken = savedToken;
+    setDriveConnected();
+    setTimeout(() => loadHistoryFromDrive(), 800);
+  }
   checkOAuthCallback();
   init();
   setTimeout(() => { if (map) map.invalidateSize(); }, 300);

@@ -1,0 +1,31 @@
+{
+  "name": "Trilhos",
+  "short_name": "Trilhos",
+  "description": "Registo de caminhadas e percursos de bicicleta com GPS",
+  "start_url": "./trilhos.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0f1a12",
+  "theme_color": "#0f1a12",
+  "icons": [
+    {
+      "src": "./icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "./icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "./icon-512-maskable.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}
